@@ -1,0 +1,4 @@
+interface:
+  display_name: "Goal Loop"
+  short_description: "Iterate durable goals across context resets"
+  default_prompt: "Use $goal-loop to pursue this goal until its acceptance criteria are verified or external authority is required."
