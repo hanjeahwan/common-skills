@@ -26,6 +26,20 @@ Expected invariants:
 - The Sol coordinator proceeds directly only after no useful split is found.
 - The response explains the concrete constraint.
 
+## Host retains the Sol coordinator role
+
+Initial state:
+
+- The host agent is executing this Skill.
+- All Luna workers completed their assignments.
+
+Expected invariants:
+
+- The host agent remains the Sol coordinator.
+- Every spawned subagent is a Luna worker.
+- The host agent personally performs the final code review.
+- No additional Sol coordinator or reviewer is spawned.
+
 ## Luna worker claims success without evidence
 
 Prompt:

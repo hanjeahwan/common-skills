@@ -1,6 +1,6 @@
 ---
 name: codex-luna-swarm
-description: Start or continue parallel coding work with a GPT-5.6 Sol coordinator that performs mandatory code review while GPT-5.6 Luna workers run at max reasoning effort. Use when a coding task has multiple independent investigation or implementation units; when the user asks for a Luna swarm, Codex-Luna swarm, parallel Luna workers, or Sol-reviewed Luna workers; or when related work continues, repairs, validates, or reviews an active Swarm. When invoked, require the Sol coordinator to evaluate a useful Swarm split before proceeding without fan-out.
+description: Start or continue parallel coding work as the GPT-5.6 Sol coordinator that performs mandatory code review while GPT-5.6 Luna workers run at max reasoning effort. Use when a coding task has multiple independent investigation or implementation units; when the user asks for a Luna swarm, Codex-Luna swarm, parallel Luna workers, or Sol-reviewed Luna workers; or when related work continues, repairs, validates, or reviews an active Swarm. When invoked, require the Sol coordinator to evaluate a useful Swarm split before proceeding without fan-out.
 ---
 
 # Codex–Luna Swarm
@@ -38,6 +38,9 @@ Use `Sol coordinator` as the canonical name for the coordinating and reviewing a
 
 ## Invariants
 
+- Host-role binding: The host agent executing this Skill is the Sol coordinator for the entire Swarm.
+- Spawned-role restriction: Every subagent spawned while this Skill is active is a Luna worker.
+- Review ownership: The host agent personally performs Step 5.
 - Every Luna worker is spawned with `model: "gpt-5.6-luna"`, `reasoning_effort: "max"`, and `fork_turns: "none"`.
 - Luna workers must not spawn subagents.
 - Luna workers must not accept another Luna worker's code as reviewed.
