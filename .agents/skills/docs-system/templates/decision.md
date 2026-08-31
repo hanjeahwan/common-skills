@@ -37,3 +37,7 @@ Related decisions in the same sequence. (Optional.)
 
 The concrete conditions under which this decision should be revisited. If it
 should never be revisited, say exactly why.
+
+## <additional section when needed>
+
+<Describe the additional concern. Remove this section when it is not needed.>

@@ -31,3 +31,7 @@ Use exactly one table shape matching the index responsibility.
 | Postmortem | Lesson |
 | --- | --- |
 | <linked incident> | <one-line reusable lesson> |
+
+## <additional section when needed>
+
+<Describe additional navigation. Remove this section when it is not needed.>

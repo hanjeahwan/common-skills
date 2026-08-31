@@ -187,7 +187,7 @@ superseded_by: P009
 - `decisions` allows 0..N.
 - `superseded_by` is used only when `status: superseded`.
 
-Template sections (in order):
+Required sections:
 
 ```md
 ## Summary
@@ -199,8 +199,13 @@ Template sections (in order):
 ## Verification
 ```
 
-`implemented` / `rejected` / `superseded` additionally require a final
-`## Outcome` section.
+`implemented` / `rejected` / `superseded` additionally require an `## Outcome`
+section.
+
+Templates define required sections, not a closed heading schema. Required
+headings MUST exist exactly once. Additional H2 sections are allowed when the
+artifact needs them. A fenced code example never contributes headings to the
+artifact structure.
 
 Deterministic recognition: a file is a Proposal when its filename matches
 `P###-*.md`, OR its YAML front matter contains `id: P###`. Once recognized,
@@ -264,7 +269,7 @@ The generic validator recognizes this table from its headers and `D###-*.md`
 links, never from a directory name. Project-specific paths and governed sets
 remain the project validator's responsibility.
 
-Template headings (in order):
+Standard headings:
 
 ```md
 # D65 <title>
@@ -278,6 +283,9 @@ Template headings (in order):
 ## Related decisions        (optional)
 ## Reconsider when
 ```
+
+The required semantic fields MUST exist exactly once. Optional standard fields
+MUST NOT be duplicated. Additional H2 sections are allowed.
 
 Deterministic recognition: filename matches `D###-*.md`. Once recognized, the
 first H1 MUST declare the corresponding `D<n>` and the numeric identity MUST
@@ -298,7 +306,8 @@ Failure modes / Escalation
 
 If there is no rollback, say so explicitly. The Runbook is an authoring
 template; the generic validator does not guess which ordinary Markdown files in
-a project are Runbooks.
+a project are Runbooks. Its headings follow the common template rule: required
+headings exist exactly once, and additional H2 sections are allowed.
 
 ## 9. Canonical summary rule
 

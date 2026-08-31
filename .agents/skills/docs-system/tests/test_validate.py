@@ -2,6 +2,7 @@
 """Project-independent checks for the reusable docs-system validator."""
 from __future__ import annotations
 
+import re
 import shutil
 import subprocess
 import tempfile
@@ -152,27 +153,31 @@ class ValidatorTests(unittest.TestCase):
                 VALID_PROPOSAL.replace("## Migration\nMigration.", "## Migration\n"),
                 "section `## Migration` is empty",
             ),
-            "order": (
+            "duplicate": (
                 VALID_PROPOSAL.replace(
-                    "## Scope\nScope.\n## Non-goals\nNone.",
-                    "## Non-goals\nNone.\n## Scope\nScope.",
+                    "## Migration\nMigration.",
+                    "## Migration\nFirst.\n## Migration\nSecond.",
                 ),
-                "proposal sections out of order",
-            ),
-            "unexpected": (
-                VALID_PROPOSAL + "\n## Notes\nNo.\n",
-                "unexpected H2 section",
+                "duplicate section `## Migration`",
             ),
         }
         for name, (content, message) in cases.items():
             with self.subTest(name=name):
                 self.assert_fails({"P001-change.md": content}, message)
 
+    def test_proposal_custom_layout_and_fenced_headings_pass(self) -> None:
+        content = VALID_PROPOSAL.replace(
+            "## Scope\nScope.\n## Non-goals\nNone.",
+            "## Non-goals\nNone.\n## Evidence\nObserved.\n## Scope\nScope.",
+        ) + "\n```md\n## Migration\nExample only.\n```\n"
+        result = self.validate({"P001-change.md": content})
+        self.assertEqual(result.returncode, 0, result.stdout)
+
     def test_proposal_lifecycle_contract_fails(self) -> None:
         cases = {
             "terminal_without_outcome": (
                 VALID_PROPOSAL.replace("draft", "implemented"),
-                "requires final `## Outcome`",
+                "requires `## Outcome`",
             ),
             "draft_with_outcome": (
                 VALID_PROPOSAL + "\n## Outcome\nDone.\n",
@@ -186,6 +191,16 @@ class ValidatorTests(unittest.TestCase):
         for name, (content, message) in cases.items():
             with self.subTest(name=name):
                 self.assert_fails({"P001-change.md": content}, message)
+
+    def test_terminal_proposal_custom_outcome_placement_passes(self) -> None:
+        content = VALID_PROPOSAL.replace(
+            "status: draft", "status: implemented"
+        ).replace(
+            "## Summary\nSummary.",
+            "## Outcome\nImplemented.\n## Summary\nSummary.",
+        )
+        result = self.validate({"P001-change.md": content})
+        self.assertEqual(result.returncode, 0, result.stdout)
 
     def test_valid_decision_passes(self) -> None:
         result = self.validate({"D001-adopt-change.md": VALID_DECISION})
@@ -331,21 +346,25 @@ class ValidatorTests(unittest.TestCase):
                 VALID_DECISION.replace("## Rationale\nRationale.", "## Rationale\n"),
                 "section `## Rationale` is empty",
             ),
-            "order": (
+            "duplicate": (
                 VALID_DECISION.replace(
-                    "## Decision\nDecision.\n## Rationale\nRationale.",
-                    "## Rationale\nRationale.\n## Decision\nDecision.",
+                    "## Rationale\nRationale.",
+                    "## Rationale\nFirst.\n## Rationale\nSecond.",
                 ),
-                "decision sections out of template order",
-            ),
-            "unexpected": (
-                VALID_DECISION + "\n## Notes\nNo.\n",
-                "unexpected H2 section",
+                "duplicate section `## Rationale`",
             ),
         }
         for name, (content, message) in cases.items():
             with self.subTest(name=name):
                 self.assert_fails({"D001-adopt-change.md": content}, message)
+
+    def test_decision_custom_layout_and_fenced_headings_pass(self) -> None:
+        content = VALID_DECISION.replace(
+            "## Decision\nDecision.\n## Rationale\nRationale.",
+            "## Rationale\nRationale.\n## Evidence\nObserved.\n## Decision\nDecision.",
+        ) + "\n```md\n## Decision\nExample only.\n```\n"
+        result = self.validate({"D001-adopt-change.md": content})
+        self.assertEqual(result.returncode, 0, result.stdout)
 
     def test_template_starters_pass(self) -> None:
         result = self.run_validator(SKILL_ROOT)
@@ -358,7 +377,41 @@ class ValidatorTests(unittest.TestCase):
 
         result = self.self_validate(mutate)
         self.assertNotEqual(result.returncode, 0, result.stdout)
-        self.assertIn("templates/runbook.md: expected sections", result.stdout)
+        self.assertIn("templates/runbook.md: missing sections", result.stdout)
+
+    def test_template_requires_extension_placeholder(self) -> None:
+        def mutate(root: Path) -> None:
+            path = root / "templates" / "proposal.md"
+            text = path.read_text().replace(
+                "## <additional section when needed>\n\n"
+                "<Describe the additional concern. Remove this section when it is not needed.>\n\n",
+                "",
+            )
+            path.write_text(text)
+
+        result = self.self_validate(mutate)
+        self.assertNotEqual(result.returncode, 0, result.stdout)
+        self.assertIn("requires one `## <additional section when needed>`", result.stdout)
+
+    def test_template_custom_layout_and_extra_h2_are_allowed(self) -> None:
+        def mutate(root: Path) -> None:
+            for name in ("proposal.md", "decision.md", "runbook.md", "index.md"):
+                path = root / "templates" / name
+                text = path.read_text()
+                headings = list(re.finditer(r"(?m)^## ", text))
+                first, second = headings[0], headings[1]
+                first_block = text[first.start():second.start()]
+                text = (
+                    text[:first.start()]
+                    + text[second.start():headings[2].start()]
+                    + "## Local section\n\nLocal content.\n\n"
+                    + first_block
+                    + text[headings[2].start():]
+                )
+                path.write_text(text)
+
+        result = self.self_validate(mutate)
+        self.assertEqual(result.returncode, 0, result.stdout)
 
     def test_invalid_skill_anatomy_fails_self_validation(self) -> None:
         def mutate(root: Path) -> None:

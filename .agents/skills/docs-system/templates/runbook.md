@@ -30,3 +30,7 @@ explicitly.
 
 Known failure modes and what each means; when to stop and escalate instead of
 repeating steps.
+
+## <additional section when needed>
+
+<Describe the additional concern. Remove this section when it is not needed.>

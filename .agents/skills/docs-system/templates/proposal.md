@@ -39,6 +39,10 @@ coordination with other work in flight.
 Checkpoints and evidence that define "done": what to run, what to compare,
 what must not regress. Every checkpoint must be traceable to a record.
 
+## <additional section when needed>
+
+<Describe the additional concern. Remove this section when it is not needed.>
+
 ## Outcome
 
 Only for `implemented` / `rejected` / `superseded` proposals. What happened
