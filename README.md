@@ -20,6 +20,20 @@ A structured contract owns the objective, acceptance criteria, constraints, and 
 - [Skill instructions](.agents/skills/codex-luna-swarm/SKILL.md)
 - [Behavior cases](.agents/skills/codex-luna-swarm/tests/cases.md)
 
+### Claude Advisor
+
+`$claude-advisor` runs an independent, read-only Claude review with stable finding IDs and resumable follow-up review.
+
+- [Skill instructions](.agents/skills/claude-advisor/SKILL.md)
+- [Behavior cases](.agents/skills/claude-advisor/tests/cases.md)
+
+### Docs System
+
+`$docs-system` maintains reachable repository documentation with one canonical owner and one canonical term for each maintained claim and concept.
+
+- [Skill instructions](.agents/skills/docs-system/SKILL.md)
+- [Behavior cases](.agents/skills/docs-system/tests/cases.md)
+
 ## Design Proposals
 
-- [Codex Goal Loop refactor](docs/proposals/codex-goal-loop-refactor-proposal-20260831-134945.md) — implemented
+- [Proposal index](docs/proposals/README.md)

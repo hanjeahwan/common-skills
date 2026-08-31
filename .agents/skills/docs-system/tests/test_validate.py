@@ -269,6 +269,14 @@ class ValidatorTests(unittest.TestCase):
             "Decision lifecycle belongs only in the domain README",
         )
 
+    def test_decision_fenced_lifecycle_example_passes(self) -> None:
+        content = VALID_DECISION.replace(
+            "## Consequences\nConsequences.",
+            "```yaml\nstatus: draft\n```\n\n## Consequences\nConsequences.",
+        )
+        result = self.validate({"D001-adopt-change.md": content})
+        self.assertEqual(result.returncode, 0, result.stdout)
+
     def test_directory_names_do_not_infer_document_types(self) -> None:
         result = self.validate({
             "research/body.md": "> 状态:项目自定义 ｜ 日期:2026-01-01\n",

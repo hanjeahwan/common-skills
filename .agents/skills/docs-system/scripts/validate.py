@@ -311,7 +311,7 @@ def check_decisions(root: str, errors: list[str]) -> None:
                 errors.append(f"{rel}: missing required section `## {section}`")
             elif not _section_body(structure, section).strip():
                 errors.append(f"{rel}: section `## {section}` is empty")
-        if LIFECYCLE_LINE_RE.search(text):
+        if LIFECYCLE_LINE_RE.search(structure):
             errors.append(
                 f"{rel}: Decision lifecycle belongs only in the domain README")
     print(f"Decision scan: {len(files)} decision(s)")

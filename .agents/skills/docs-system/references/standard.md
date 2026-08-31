@@ -341,6 +341,9 @@ Checks where applicable:
 - duplicate Proposal IDs;
 - per-file Decision filename / numeric identity / required sections;
 - duplicate Decision IDs (where deterministically identifiable);
+- canonical index-table columns, Decision lifecycle vocabulary, and required
+  successor links;
+- absence of Decision lifecycle state in Decision bodies;
 - reusable template starter validity;
 - this skill's own stable `SKILL.md` structure (self-validation only).
 

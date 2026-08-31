@@ -1,10 +1,11 @@
 ---
+id: P002
 status: implemented
 ---
 
 # Codex Goal Loop Refactor Proposal
 
-## Objective
+## Summary
 
 Integrate `codex-goal-loop` with the native Codex Goal lifecycle while preserving the structured goal contract currently stored under `.goal/`.
 
@@ -16,7 +17,33 @@ The refactored design must keep these properties:
 - The same fact is never authoritative in both the native Goal and the goal file.
 - Observe, Decide, Act, Verify, and evidence-based completion remain the execution discipline.
 
-## Native Goal Interface
+## Problem
+
+The former design assigned lifecycle state to both the structured goal file and
+the native Codex Goal. Those independent state machines could disagree after a
+native edit, pause, resume, blocked transition, or completion. The structured
+file was still needed for the detailed semantic contract, so the required
+change was to separate authority instead of removing the file.
+
+## Scope
+
+- Native Goal operation boundaries and lifecycle ownership.
+- Structured goal-contract identity, schema, location, and authority.
+- Start, resume, checkpoint, handoff, migration, and lifecycle transitions.
+- The `codex-goal-loop` instructions, template, agent metadata, behavior cases,
+  repository description, and local `.goal/` boundary.
+
+## Non-goals
+
+- Replacing native Codex Goal with a custom scheduler or runner.
+- Copying the entire structured contract into the native objective.
+- Adding locks, event ledgers, subgoal trees, automatic commits, or background wake-up behavior.
+- Supporting multiple simultaneous native Goals in one active Codex Goal Loop.
+- Refactoring unrelated skills or repository configuration.
+
+## Proposal
+
+### Native Goal Interface
 
 The refactor depends only on the following native operations. Provenance is stated per operation so runtime-specific behavior is not mistaken for a portable Skill invariant.
 
@@ -32,7 +59,7 @@ There is no agent tool for editing an active Goal objective, pausing, resuming, 
 
 The public Goal command contract and the recommendation to reference longer project files are documented in [Follow a goal](https://learn.chatgpt.com/use-cases/follow-goals) and [Developer commands](https://learn.chatgpt.com/docs/developer-commands?surface=cli).
 
-## Root Cause
+### Ownership Conflict
 
 The current design assigns overlapping ownership:
 
@@ -44,7 +71,7 @@ This creates two independent lifecycle state machines. They can disagree after n
 
 The goal file is not the problem. The duplicated ownership is.
 
-## Proposed Authority Model
+### Proposed Authority Model
 
 | Concern | Sole authority | Rule |
 | --- | --- | --- |
@@ -74,7 +101,7 @@ The contract locator has a deterministic protocol:
 - A missing, ambiguous, absolute, or escaping path is an authority failure. Stop and request correction; never reconstruct the contract from memory.
 - The filename is an immutable locator. The `# Goal: <title>` heading is display metadata and is not copied into the native objective.
 
-## Goal File Schema
+### Goal File Schema
 
 Keep the existing two-section structure with one ownership change.
 
@@ -123,9 +150,9 @@ Remove `Working State > Status`. The file must not store `CONTINUE`, `BLOCKED`, 
 
 `Acceptance Status` remains a non-authoritative evidence index. It must point to observable evidence and state when that evidence becomes stale. On resume, re-verify criteria affected by later changes or time-sensitive external facts; do not discard still-valid evidence merely because a new invocation began. Native Goal completion still requires Codex to reconcile every entry against current reality.
 
-## Start Flow
+### Start Flow
 
-### Explicit Goal Request
+#### Explicit Goal Request
 
 Treat an explicit `$codex-goal-loop <intent>` request, or another direct request to create a Codex Goal, as authority to start the flow. Automatic Skill selection and `$codex-goal-loop` without an objective do not authorize native Goal creation.
 
@@ -143,7 +170,7 @@ If native Goal creation fails after the file is written, retain the file as an u
 
 Do not create a native Goal merely because an ordinary task appears long-running. Native Goal creation still requires an explicit user request.
 
-### Existing Native Goal
+#### Existing Native Goal
 
 Check lifecycle status before inspecting its locator:
 
@@ -161,7 +188,7 @@ For an active native Goal, use this exhaustive locator branch:
 | It has no locator, but its objective matches the requested intent. | Draft the contract, obtain approval, then ask the user to use `/goal edit` to install the locator before resuming. |
 | It has no locator and represents a different intent, or points to another valid contract. | Stop and ask the user to continue, complete, pause, or clear that Goal. Do not create a second Goal. |
 
-## Resume Flow
+### Resume Flow
 
 1. Read the current native Goal.
 2. Resolve the goal-file path from the exact `Contract:` locator.
@@ -172,13 +199,13 @@ For an active native Goal, use this exhaustive locator branch:
 
 The file path is discovered from the native Goal. The host no longer needs a separate goal-file handoff parameter.
 
-### Durability Boundary
+#### Durability Boundary
 
 The default `.goal/` contract is intentionally local and gitignored. Resume is supported only while the same workspace data remains available; the native lifecycle handle does not make a missing local contract portable.
 
 If cross-machine, fresh-clone, or cloud resume is an explicit requirement, the contract must instead live in a user-approved tracked project document. The same `Contract:` protocol applies. The Skill must not commit or publish the contract automatically.
 
-## Contract Changes
+### Contract Changes
 
 Codex must never autonomously reinterpret or edit `Protected Goal`.
 
@@ -192,7 +219,7 @@ When evidence shows that L0, L1, constraints, or non-goals must change:
 
 The native objective normally remains unchanged because it points to the contract rather than duplicating it.
 
-## Iteration and Checkpoint Rules
+### Iteration and Checkpoint Rules
 
 Keep the current loop:
 
@@ -212,13 +239,13 @@ flowchart LR
 - Patch only `Working State` during ordinary iterations.
 - Treat plans, prior checkpoints, and historical tests as evidence, not truth.
 
-## Native Lifecycle Mapping
+### Native Lifecycle Mapping
 
-### Continue
+#### Continue
 
 When another authorized action can advance the goal, keep the native Goal active and record the next checkpoint. Do not persist a parallel `CONTINUE` status.
 
-### Blocked
+#### Blocked
 
 Report an authority boundary or unavailable required input immediately, but transition the native Goal to blocked only when the current native Goal contract permits it. Do not implement a second blocker counter or separate blocked state in the goal file.
 
@@ -226,7 +253,7 @@ When the native blocked transition is not yet permitted, keep the Goal active, w
 
 Pause, resume, and clear remain native user or host operations.
 
-### Complete
+#### Complete
 
 Complete the native Goal only when:
 
@@ -237,7 +264,7 @@ Complete the native Goal only when:
 
 After the native completion succeeds, report its final status and usage. Do not write `DONE` into the goal file.
 
-## Handoff Format
+### Handoff Format
 
 At an invocation boundary, report:
 
@@ -252,9 +279,9 @@ Next: next action, external decision needed, or completion statement
 
 The native Goal is the resumable lifecycle handle. The contract path is derived from its objective.
 
-## File-Level Refactor Plan
+### File-Level Refactor Plan
 
-### `.agents/skills/codex-goal-loop/SKILL.md`
+#### `.agents/skills/codex-goal-loop/SKILL.md`
 
 - Use this intent-routable description: `Pursue an explicitly requested bounded goal, or continue a previously established goal contract, through repeated evidence-driven Observe, Decide, Act, and Verify iterations backed by the native Codex Goal lifecycle. Use for long-running or autonomous work; do not use for ordinary one-shot tasks.`
 - Replace file-owned lifecycle instructions with the authority model above.
@@ -263,31 +290,31 @@ The native Goal is the resumable lifecycle handle. The contract path is derived 
 - Remove the runner-owned goal-file-path contract.
 - Preserve the Responsibility Boundary section and the rules against premature blocking and treating failed verification as a blocker.
 
-### `.agents/skills/codex-goal-loop/references/goal-template.md`
+#### `.agents/skills/codex-goal-loop/references/goal-template.md`
 
 - Keep the structured contract template.
 - Remove `Working State > Status`.
 - Clarify that `Protected Goal` owns semantics and native Goal owns lifecycle.
 - Change the heading to `# Goal: <title>` and add evidence metadata plus `Pending External Decision`.
 
-### `.agents/skills/codex-goal-loop/agents/openai.yaml`
+#### `.agents/skills/codex-goal-loop/agents/openai.yaml`
 
 - Keep routing based on user intent rather than unknowable runtime state.
 - Use `short_description: "Run structured contracts through Codex Goals"`.
 - Use `default_prompt: "Use $codex-goal-loop to create or resume a native Codex Goal backed by a structured goal contract, and pursue it until its acceptance criteria are verified or external authority is required."`.
 
-### `.agents/skills/codex-goal-loop/tests/cases.md`
+#### `.agents/skills/codex-goal-loop/tests/cases.md`
 
 - Add one realistic forward-test case for each A1-A8 invariant.
 - Specify initial native Goal state, contract contents, user input, expected tool transition, expected file mutation, and prohibited behavior.
 - Keep the cases behavioral; do not assert incidental wording or internal implementation details.
 
-### `README.md`
+#### `README.md`
 
 - Explain the split between the native lifecycle handle, structured contract, and replaceable checkpoint.
 - Replace the claim that work stops only at local `BLOCKED` or `DONE` with the native lifecycle ownership model.
 
-### `.gitignore`
+#### `.gitignore`
 
 - Keep `/.goal/` because structured contracts and working checkpoints remain local runtime artifacts.
 
@@ -304,7 +331,9 @@ When resuming a legacy file:
 
 No bulk migration or automatic rewrite is required.
 
-## Acceptance Criteria for the Refactor
+## Verification
+
+### Acceptance Criteria
 
 - A1: An explicit `$codex-goal-loop` request can produce a structured goal file and one native Codex Goal that references it.
 - A2: The native objective does not duplicate L0, L1, constraints, or non-goals.
@@ -315,7 +344,7 @@ No bulk migration or automatic rewrite is required.
 - A7: Legacy goal files remain resumable without bulk migration.
 - A8: Skill metadata, instructions, template, and README describe the same authority model.
 
-## Validation Plan
+### Validation Plan
 
 1. Run the `skill-creator` quick validator when available; otherwise validate frontmatter, naming, reference links, and unfinished placeholders manually. The repository does not contain its own validator.
 2. Test a new explicit goal with multiple acceptance criteria; assert that the native objective contains one valid `Contract:` line and does not copy Protected Goal content.
@@ -330,10 +359,16 @@ No bulk migration or automatic rewrite is required.
 11. Resume one legacy goal file; assert that legacy Status is ignored and removed only after native linkage succeeds.
 12. Compare `SKILL.md`, `goal-template.md`, `openai.yaml`, and `README.md`; assert that all assign semantic authority to the contract and lifecycle authority to native Goal.
 
-## Non-goals
+## Outcome
 
-- Replacing native Codex Goal with a custom scheduler or runner.
-- Copying the entire structured contract into the native objective.
-- Adding locks, event ledgers, subgoal trees, automatic commits, or background wake-up behavior.
-- Supporting multiple simultaneous native Goals in one active Codex Goal Loop.
-- Refactoring unrelated skills or repository configuration.
+The refactor was implemented in the canonical
+[`codex-goal-loop` instructions](../../.agents/skills/codex-goal-loop/SKILL.md),
+the [goal contract template](../../.agents/skills/codex-goal-loop/references/goal-template.md),
+the [behavior cases](../../.agents/skills/codex-goal-loop/tests/cases.md), and
+the [agent metadata](../../.agents/skills/codex-goal-loop/agents/openai.yaml).
+The native Codex Goal now owns lifecycle, budget, and usage. `Protected Goal`
+owns goal semantics, and `Working State` remains a replaceable evidence
+checkpoint without a parallel lifecycle status.
+
+No Decision record was required: this Proposal preserves the implementation
+history, while the linked Skill resources own current behavior.
