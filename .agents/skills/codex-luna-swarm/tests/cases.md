@@ -17,7 +17,7 @@ Expected invariants:
 
 Prompt:
 
-> Use the Sol-Luna swarm to correct one misspelled local variable.
+> Use the Codex-Luna swarm to correct one misspelled local variable.
 
 Expected invariants:
 

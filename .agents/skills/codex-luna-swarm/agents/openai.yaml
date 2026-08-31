@@ -1,0 +1,4 @@
+interface:
+  display_name: "Codex–Luna Swarm"
+  short_description: "Parallel Luna workers with mandatory Sol review"
+  default_prompt: "Use $codex-luna-swarm to split this coding task across GPT-5.6 Luna workers at max reasoning effort, then have Sol review the integrated code before delivery."

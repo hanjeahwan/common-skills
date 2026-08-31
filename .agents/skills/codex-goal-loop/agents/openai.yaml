@@ -1,0 +1,4 @@
+interface:
+  display_name: "Codex Goal Loop"
+  short_description: "Run structured contracts through Codex Goals"
+  default_prompt: "Use $codex-goal-loop to create or resume a native Codex Goal backed by a structured goal contract, and pursue it until its acceptance criteria are verified or external authority is required."

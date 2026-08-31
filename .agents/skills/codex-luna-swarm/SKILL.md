@@ -1,9 +1,9 @@
 ---
-name: sol-luna-swarm
-description: Orchestrate parallel coding work with GPT-5.6 Sol as the sole coordinator and mandatory code reviewer while GPT-5.6 Luna workers run at max reasoning effort. Use when a coding task has multiple independent investigation or implementation units, or when the user asks for a Luna swarm, Sol-Luna swarm, parallel Luna agents, or Sol-reviewed subagents. Do not use for small or tightly coupled work where delegation adds no useful parallelism.
+name: codex-luna-swarm
+description: Orchestrate parallel coding work with GPT-5.6 Sol as the sole coordinator and mandatory code reviewer while GPT-5.6 Luna workers run at max reasoning effort. Use when a coding task has multiple independent investigation or implementation units, or when the user asks for a Luna swarm, Codex-Luna swarm, parallel Luna agents, or Sol-reviewed subagents. Do not use for small or tightly coupled work where delegation adds no useful parallelism.
 ---
 
-# Sol–Luna Swarm
+# Codex–Luna Swarm
 
 Use one execution pattern: Luna workers investigate or implement in parallel, then Sol personally reviews the combined code before delivery. Parallelism provides speed; the Sol review gate provides safety. Do not split these into separate modes.
 
