@@ -70,7 +70,7 @@ DECISION_LIFECYCLES = {
     "current", "partially-superseded", "superseded", "void",
 }
 LIFECYCLE_LINE_RE = re.compile(
-    r"(?mi)^(?:[-*>]\s*)?(?:status|lifecycle|状态|生命周期)\s*[:：]")
+    r"(?mi)^(?:[-*>]\s*)?(?:status|lifecycle)\s*:")
 
 INLINE_LINK_RE = re.compile(
     r"\]\(\s*(?:<([^>]+)>|([^\s)]+))"

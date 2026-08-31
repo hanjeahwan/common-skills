@@ -9,16 +9,16 @@ Use one execution pattern: Luna workers investigate or implement in parallel, th
 
 ```mermaid
 flowchart TD
-    S[Sol 拆分任务] --> L1[Luna 1]
+    S[Sol Splits Tasks] --> L1[Luna 1]
     S --> L2[Luna 2]
     S --> LN[Luna N]
-    L1 --> G[汇集修改与证据]
+    L1 --> G[Collect Changes And Evidence]
     L2 --> G
     LN --> G
-    G --> R[Sol 亲自 Code Review]
-    R -->|未通过| F[退回定向修正]
+    G --> R[Sol Performs Code Review]
+    R -->|Rejected| F[Return Targeted Fix]
     F --> G
-    R -->|通过| V[验证并交付]
+    R -->|Approved| V[Verify And Deliver]
 ```
 
 ## Responsibility Boundary

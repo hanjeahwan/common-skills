@@ -279,7 +279,7 @@ class ValidatorTests(unittest.TestCase):
 
     def test_directory_names_do_not_infer_document_types(self) -> None:
         result = self.validate({
-            "research/body.md": "> 状态:项目自定义 ｜ 日期:2026-01-01\n",
+            "research/body.md": "> State: project-defined | Date: 2026-01-01\n",
             "findings/README.md": (
                 "| Finding | Status |\n| --- | --- |\n| one | project-defined |\n"
             ),
