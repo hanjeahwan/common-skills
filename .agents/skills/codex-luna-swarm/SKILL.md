@@ -1,21 +1,21 @@
 ---
 name: codex-luna-swarm
-description: Start or continue parallel coding work with GPT-5.6 Sol as the sole coordinator and mandatory code reviewer while GPT-5.6 Luna workers run at max reasoning effort. Use when a coding task has multiple independent investigation or implementation units; when the user asks for a Luna swarm, Codex-Luna swarm, parallel Luna agents, or Sol-reviewed subagents; or when a follow-up continues, repairs, validates, or reviews work already started with this Skill. Do not fan out small or tightly coupled work where delegation adds no useful parallelism.
+description: Start or continue parallel coding work with a GPT-5.6 Sol coordinator that performs mandatory code review while GPT-5.6 Luna workers run at max reasoning effort. Use when a coding task has multiple independent investigation or implementation units; when the user asks for a Luna swarm, Codex-Luna swarm, parallel Luna workers, or Sol-reviewed Luna workers; or when related work continues, repairs, validates, or reviews an active Swarm. When invoked, require the Sol coordinator to evaluate a useful Swarm split before proceeding without fan-out.
 ---
 
 # Codex–Luna Swarm
 
-Use one execution pattern: Luna workers investigate or implement in parallel, then Sol personally reviews the combined code before delivery. Parallelism provides speed; the Sol review gate provides safety. Do not split these into separate modes.
+Use one execution pattern: Luna workers investigate or implement in parallel, then the Sol coordinator personally reviews the combined code before delivery. Parallelism provides speed; the Sol coordinator review gate provides safety. Do not split these into separate modes.
 
 ```mermaid
 flowchart TD
-    S[Sol Splits Tasks] --> L1[Luna 1]
-    S --> L2[Luna 2]
-    S --> LN[Luna N]
+    S[Sol Coordinator Splits Tasks] --> L1[Luna Worker 1]
+    S --> L2[Luna Worker 2]
+    S --> LN[Luna Worker N]
     L1 --> G[Collect Changes And Evidence]
     L2 --> G
     LN --> G
-    G --> R[Sol Performs Code Review]
+    G --> R[Sol Coordinator Performs Code Review]
     R -->|Rejected| F[Return Targeted Fix]
     F --> G
     R -->|Approved| V[Verify And Deliver]
@@ -23,7 +23,9 @@ flowchart TD
 
 ## Responsibility Boundary
 
-| Work | Sol | Luna |
+Use `Sol coordinator` as the canonical name for the coordinating and reviewing actor. Use `Luna worker` as the canonical name for each delegated actor. Keep `agent tree` and `subagent` only for their runtime and tool meanings.
+
+| Work | Sol coordinator | Luna workers |
 |---|---|---|
 | Initial investigation | Perform the minimum investigation needed to define the problem and scope | Deepen independent lines of investigation |
 | Code call paths | Define the boundary and verify critical paths | Investigate separate modules in parallel |
@@ -31,69 +33,71 @@ flowchart TD
 | Root-cause decision | Make the final determination | Provide candidate causes and evidence |
 | Code implementation | Implement directly or delegate | Act as the primary implementer |
 | Tests and checks | Re-run and verify critical results | Run relevant checks first and report them |
-| Code review | Perform it personally | Never substitute for Sol's review |
+| Code review | Perform it personally | Never substitute for the Sol coordinator's review |
 | Conflict resolution and delivery | Retain final decision authority | Do not make the final decision |
 
 ## Invariants
 
-- Every worker is spawned with `model: "gpt-5.6-luna"`, `reasoning_effort: "max"`, and `fork_turns: "none"`.
-- Luna workers must not spawn subagents or accept another worker's code as reviewed.
-- Every code change must pass Sol's direct review. A Luna summary, test result, or self-review cannot replace this gate.
-- Use the smallest useful worker set. Do not create a swarm when the task lacks at least two genuinely independent work units.
-- Preserve the current authorization and safety boundaries. Never delegate approval decisions or use delegation to broaden scope.
-
-## Multi-turn Continuation
-
-A follow-up remains part of the existing Swarm when it continues, repairs,
-validates, or reviews the same user-visible task. The user does not need to
-repeat `$codex-luna-swarm`.
-
-At the start of a related follow-up:
-
-1. Inspect the known and live agent tree before creating workers.
-2. Reuse a relevant Luna worker when its prior context materially helps. Send
-   the follow-up to that worker instead of creating a duplicate session.
-3. If a relevant worker is already running, update its bounded task rather than
-   assigning the same work elsewhere.
-4. Create a replacement or additional Luna only for a proven independent work
-   unit, using the complete task packet and required model profile.
-5. If the remaining work is small or tightly coupled, Sol handles it directly;
-   the integration, review, and validation gates still apply.
-6. Never guess a missing worker identity or claim continuity that the live agent
-   tree and conversation do not establish.
-
-Continuity ends when the user changes the goal, explicitly ends the Swarm, the
-task is complete with no follow-up work, or the remaining task no longer belongs
-to the same user-visible outcome. Do not create a persistent session registry or
-duplicate lifecycle state to preserve continuity.
+- Every Luna worker is spawned with `model: "gpt-5.6-luna"`, `reasoning_effort: "max"`, and `fork_turns: "none"`.
+- Luna workers must not spawn subagents.
+- Luna workers must not accept another Luna worker's code as reviewed.
+- Every code change must pass the Sol coordinator's direct review. A Luna worker summary, test result, or self-review cannot replace this gate.
+- When this Skill is invoked, the Sol coordinator must evaluate the task against the Swarm condition in Step 1 before proceeding alone.
+- Never invent work merely to increase the Luna worker count.
+- The Sol coordinator retains every approval decision.
+- The Sol coordinator applies the current authorization and safety boundaries to delegated work.
+- Delegation must remain within the authorized scope.
+- Keep this Skill active while work serves the same user-visible outcome, including repairs, validation, and review.
+- The user does not need to repeat the Skill name while it remains active.
+- Reuse an existing Luna worker when its assignment continues the same objective, owned files, or evidence path.
+- Create a new Luna worker only for independent work or deliberate context isolation.
+- Inspect the known and live agent tree before assigning work.
+- Assign each work unit to one Luna worker.
+- Never infer a missing Luna worker identity.
+- Claim Luna worker continuity only when the known and live agent tree establishes the identity.
+- A wait operation that returns no update does not change a running Luna worker's state.
+- Continue waiting while a Luna worker remains running.
+- Elapsed time alone must not justify interrupting, replacing, or taking over a Luna worker.
 
 ## Workflow
 
 ### 1. Establish The Work
 
-Before spawning workers, inspect enough evidence to state the user-visible goal, current behavior, constraints, acceptance conditions, and what remains out of scope. Separate independent work from work that depends on earlier findings.
+Before assigning Luna workers:
 
-If parallelism would not reduce meaningful uncertainty or wall-clock time, continue without a swarm and explain why.
+- State the user-visible goal, current behavior, constraints, acceptance conditions, and out-of-scope work from inspected evidence.
+- Separate independent investigation, implementation, and verification units from work that depends on earlier findings.
+- Swarm condition: At least two independent units can run concurrently without conflicting write ownership, and each unit advances an acceptance condition or resolves a named uncertainty.
+- Swarm action: Assign each qualifying unit to a Luna worker.
+- Direct-execution condition: No split satisfies the Swarm condition.
+- Direct-execution action: The Sol coordinator proceeds alone and states the concrete constraint.
 
 ### 2. Assign Independent Ownership
 
-Give each Luna a bounded task packet:
+Give each Luna worker a bounded task packet:
 
 ```yaml
 objective: one concrete outcome
 facts: only the verified context needed for this task
 scope: allowed files, components, or questions
-write_owner: files this worker alone may modify; empty means read-only
+write_owner: files this Luna worker alone may modify; empty means read-only
 acceptance: observable conditions for success
 exclusions: actions and areas outside authority
 return: findings, sources when research was performed, changed files, validation, and unresolved risks
 ```
 
-Prefer two to four workers initially. Increase only when more independent units are already proven.
+- Start with two to four Luna workers.
+- Increase the Luna worker count only when more proven independent units remain unassigned.
 
-Workers that might touch the same file must not edit concurrently. Assign one writer and make the others read-only investigators, or run the dependent work sequentially.
+- Shared-file condition: Two or more Luna workers may touch the same file.
+- Shared-file action: Assign one Luna worker as the write owner and make the other Luna workers read-only for that file.
+- Scheduling alternative: Run dependent write assignments sequentially.
 
-### 3. Spawn Luna Workers
+- Assignment preparation: Inspect the known and live agent tree.
+- Luna worker reuse condition: An existing Luna worker retains context needed by the assignment.
+- Luna worker reuse action: Update that Luna worker's bounded task instead of creating a duplicate assignment.
+
+### 3. Run Luna Workers
 
 Use the collaboration subagent tool directly with:
 
@@ -105,51 +109,82 @@ Use the collaboration subagent tool directly with:
 }
 ```
 
-Send the full bounded task packet because the worker receives no inherited conversation. Run independent tasks concurrently, then wait for their results without busy polling.
+- Spawn action: Send each Luna worker the complete bounded task packet because it receives no inherited conversation.
+- Execution action: Run independent Luna worker assignments concurrently.
+- Wait action: Wait for Luna worker results without busy polling.
+- No-update action: Inspect the live agent state.
+- Running-state action: Continue waiting.
+- Interrupt condition: The user requests interruption, the assignment leaves task scope, or continued execution would cross an authorization or safety boundary.
+- Interrupt action: Interrupt the running Luna worker.
+- Replacement condition: The prior Luna worker is no longer running and its assignment remains incomplete because it failed, reported that it cannot continue, or returned a partial result.
+- Replacement action: Spawn a replacement Luna worker with a complete bounded task packet.
+- Additional-worker condition: A proven independent unit remains unassigned.
+- Additional-worker action: Spawn another Luna worker for that unit.
+- Direct-execution condition: The remaining work does not satisfy the Swarm condition.
+- Direct-execution action: The Sol coordinator completes the remaining work and applies the integration, review, and validation gates.
 
 ### 4. Integrate Evidence And Changes
 
-Before review, account for every required worker outcome: it must be complete or explicitly superseded by Sol. If a worker fails, times out, or returns only a partial result, Sol must replan the missing work, replace it, or stop and report the blocker; never silently omit it.
+- Integration entry gate: Every required Luna worker outcome is complete or validly superseded.
+- Supersede a required Luna worker outcome only when its assigned work is no longer part of the user-visible task.
+- Recovery condition: A Luna worker is no longer running and its required outcome remains incomplete.
+- Recovery action: Return the incomplete assignment to Step 3.
+- Omission prohibition: Never omit an incomplete required outcome.
+- Evidence collection: The Sol coordinator reads every Luna worker result.
+- Workspace inspection: The Sol coordinator inspects the actual workspace.
+- Evidence gate: Treat Luna worker summaries as claims until files, diffs, logs, or test output support them.
 
-Sol reads every worker result and inspects the actual workspace. Treat summaries as claims until supported by files, diffs, logs, or test output.
-
-- Reconcile contradictions instead of silently choosing the most confident answer.
+- Reconcile contradictory Luna worker results.
 - Reject out-of-scope edits and unexplained files.
-- Resolve integration at the authoritative source; do not preserve duplicate implementations as a shortcut.
-- Request rework only when review produces concrete new evidence. Do not repeat an unchanged failed instruction.
+- Resolve integration at the authoritative source.
+- Never preserve duplicate implementations as an integration shortcut.
+- Request rework only when review produces concrete new evidence.
+- Never repeat an unchanged failed instruction.
 
-### 5. Sol Code Review Gate
+### 5. Sol Coordinator Code Review Gate
 
-Sol personally reviews the combined result before declaring success:
+The Sol coordinator personally reviews the combined result before declaring success:
 
 1. Inspect the complete diff and map each change to the confirmed goal or root cause.
 2. Read the changed logic in its caller, callee, state, and error-propagation context.
 3. Look adversarially for incorrect assumptions, write conflicts, duplicate rules, hidden fallbacks, scope expansion, and regressions.
-4. Run proportionate tests, type checks, builds, and lint where available and relevant.
+4. Run the available tests, type checks, builds, and lint that cover the changed behavior and affected paths.
 5. Confirm the original problem is resolved and important normal paths still work.
 
-If review fails, Sol either sends a focused repair task with the concrete defect and acceptance condition, fixes it within existing authority, or stops when further progress requires guessing or new authorization. Every repair must return to Step 4 and pass the complete Sol code review and validation gate again before delivery.
+- Review-failure action: The Sol coordinator identifies a concrete defect and acceptance condition.
+- Luna worker repair condition: The prior Luna worker's context is needed for the repair.
+- Luna worker repair action: Send the focused repair to that Luna worker.
+- Sol coordinator repair condition: The repair does not need Luna worker context and remains within the Sol coordinator's existing authority.
+- Sol coordinator repair action: The Sol coordinator fixes the defect directly.
+- Stop condition: Further progress requires guessing or new authorization.
+- Stop action: Stop and report the required evidence or authorization.
+- Re-entry gate: Every repair returns to Step 4 and passes the complete Sol coordinator review and validation gate before delivery.
 
 ### 6. Deliver
 
 The final response must identify:
 
-- how work was divided and which workers changed files;
-- what Sol found during its own code review;
+- how work was divided and which Luna workers changed files;
+- what the Sol coordinator found during its own code review;
 - evidence that the original problem and normal paths were verified;
 - tests and checks run, including failures or omissions;
 - unresolved assumptions, risks, and unrelated findings.
 
-Only Sol can mark the overall task complete.
+Only the Sol coordinator can mark the overall task complete.
 
 ## Boundaries
 
 - Do not build a DAG engine, voting system, consensus layer, persistent memory, role registry, or recursive hierarchy unless a demonstrated failure requires it.
-- Do not let worker count substitute for task decomposition or evidence quality.
-- Do not ask multiple workers to make competing edits in the shared workspace.
+- Do not create a persistent session registry or duplicate lifecycle state to preserve Luna worker continuity.
+- Do not let Luna worker count substitute for task decomposition or evidence quality.
+- Do not ask multiple Luna workers to make competing edits in the shared workspace.
 - Do not treat passing tests as sufficient code review.
 - Do not commit, push, deploy, publish, delete, or perform irreversible actions unless the user has separately authorized them.
 
 ## Quality Standard
 
-A successful run gains real parallelism from independent Luna work, has no concurrent write ownership conflict, and ends with Sol independently inspecting the integrated code and verification evidence before delivery.
+A successful run meets all of these conditions:
+
+- Independent Luna worker assignments provide real parallel execution.
+- No concurrent write ownership conflict remains.
+- The Sol coordinator independently inspects the integrated code and verification evidence before delivery.
