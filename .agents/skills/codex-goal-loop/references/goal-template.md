@@ -1,8 +1,10 @@
 # Goal Contract Template
 
-Use this template when creating a contract, restoring required sections, migrating a legacy file, or applying an externally approved refinement.
+Use this template only when [`SKILL.md`](../SKILL.md) routes contract creation, required-section restoration, or an approved refinement here.
 
-The default local path is `.goal/<title-datetime>.md`. When cross-machine, fresh-clone, or cloud resume is explicitly required, use the user-approved tracked project-document path instead.
+Select the contract path under [`workflow.md`](workflow.md).
+
+Populate Protected Goal and Working State under the authority rules in [`SKILL.md`](../SKILL.md#authority) and the checkpoint rules in [`workflow.md`](workflow.md#contract-and-working-state).
 
 ```md
 # Goal: <title>
@@ -44,12 +46,3 @@ The default local path is `.goal/<title-datetime>.md`. When cross-machine, fresh
 
 ### Next Best Action
 ```
-
-## Section Ownership
-
-- `Protected Goal` is the sole authority for the display title, L0 Objective, L1 Acceptance Criteria, constraints, and non-goals. Change it only after explicit user approval.
-- Native Codex Goal is the sole authority for lifecycle, budget, and usage state. Never add `CONTINUE`, `BLOCKED`, or `DONE` to this file as lifecycle status.
-- `Working State` is a compressed, replaceable evidence checkpoint. Patch it after meaningful verification and before an invocation handoff.
-- Refer to Acceptance Criteria by ID in Working State; do not duplicate or reinterpret their wording.
-- Preserve still-valid evidence across invocations. Re-verify evidence affected by its invalidation conditions or time-sensitive external facts.
-- Record evidence summaries and locators, not full transcripts or raw private data.
