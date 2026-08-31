@@ -1,6 +1,7 @@
 ---
 name: codex-goal-loop
 description: Pursue an explicitly requested bounded goal, or continue a previously established goal contract, through repeated evidence-driven Observe, Decide, Act, and Verify iterations backed by the native Codex Goal lifecycle. Use for long-running or autonomous work; do not use for ordinary one-shot tasks.
+disable-model-invocation: true
 ---
 
 # Codex Goal Loop

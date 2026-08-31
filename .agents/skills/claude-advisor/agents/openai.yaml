@@ -1,4 +1,4 @@
 interface:
-  display_name: 'Claude Advisor'
-  short_description: 'Run independent reviews in one read-only Claude CLI session'
-  default_prompt: 'Use $claude-advisor to start or continue an independent read-only Claude review.'
+  display_name: "Claude Advisor"
+  short_description: "Review with Claude without modifying the target"
+  default_prompt: "Use $claude-advisor to start or continue an independent Claude review without modifying the review target."
