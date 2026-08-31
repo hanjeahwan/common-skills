@@ -1,0 +1,20 @@
+interface:
+  display_name: "Documentation System"
+  short_description: "Govern repository documentation ownership and reachability"
+  default_prompt: "Use $docs-system to route this documentation change through its canonical owner and validate the result."
+compatibility:
+  canonical_format: "agent-skills"
+  adapter_targets:
+    - "generic"
+  activation:
+    mode: "automatic"
+    paths: []
+  execution:
+    context: "inline"
+    shell: "bash"
+  trust:
+    source_tier: "local"
+    remote_inline_execution: "forbid"
+    remote_metadata_policy: "allow-metadata-only"
+  degradation:
+    generic: "neutral-source"

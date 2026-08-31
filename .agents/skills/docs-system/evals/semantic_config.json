@@ -1,0 +1,65 @@
+{
+  "optimizer_hints": {
+    "capability": "Govern repository documentation ownership, reachability and lifecycle",
+    "inputs": ["repository docs", "documentation graph", "README", "仓库文档"],
+    "trigger_actions": ["bootstrap documentation", "create documentation", "change documentation", "review documentation", "refactor documentation", "治理仓库文档"],
+    "exclusions": ["one-off prose", "translation only", "summary only", "project-specific documentation workflow"],
+    "artifacts": ["documentation entry", "canonical owner", "broken links", "orphans", "duplicate truth"]
+  },
+  "fallback_positive_concepts": ["documentation_governance"],
+  "positive_concepts": {
+    "documentation_governance": {
+      "weight": 0.7,
+      "phrases": [
+        "documentation system", "repository documentation", "repository docs",
+        "documentation graph", "documentation entry", "canonical owner",
+        "broken links", "orphans", "duplicate truth", "architecture document",
+        "bootstrap", "仓库文档", "文档接入", "文档治理", "统一入口",
+        "重复真源", "孤儿文档"
+      ]
+    },
+    "documentation_change": {
+      "weight": 0.3,
+      "phrases": [
+        "documentation create", "documentation change", "documentation review",
+        "documentation refactor", "create a new", "refactor", "review our"
+      ]
+    }
+  },
+  "negative_concepts": {
+    "one_off_prose": {
+      "weight": 0.5,
+      "exclusive": true,
+      "phrases": ["one-off", "temporary copy", "临时文案"]
+    },
+    "translation_only": {
+      "weight": 0.6,
+      "exclusive": true,
+      "phrases": ["translate", "translation", "翻译"]
+    },
+    "summary_only": {
+      "weight": 0.6,
+      "exclusive": true,
+      "phrases": ["summarize", "summary only", "总结"]
+    },
+    "code_only": {
+      "weight": 0.5,
+      "exclusive": true,
+      "phrases": ["fix this Python function", "docs unchanged"]
+    },
+    "project_specific_workflow": {
+      "weight": 0.7,
+      "exclusive": true,
+      "phrases": [
+        "existing API-doc generator workflow",
+        "more specific project workflow",
+        "已有更具体的文档发布流程"
+      ]
+    },
+    "no_repository_change": {
+      "weight": 0.5,
+      "exclusive": true,
+      "phrases": ["do not change docs", "do not create a repository artifact"]
+    }
+  }
+}

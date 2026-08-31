@@ -1,0 +1,4 @@
+DECISION: REJECT
+DOMAIN_ENTRY: docs/facts/README.md
+CHANGES: No changes made; retain docs/facts/README.md as the sole facts-domain entry; do not create parallel docs/facts.md
+VALIDATION: confirmed docs/README.md routes to docs/facts/README.md, confirmed docs/facts/README.md routes to docs/facts/api-behavior.md, confirmed requested duplicate topic links in docs/facts.md would violate single-entry ownership

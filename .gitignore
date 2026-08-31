@@ -123,5 +123,6 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-# Long-running goal state
-/.goal/
+.DS_Store
+
+

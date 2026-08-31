@@ -1,0 +1,4 @@
+interface:
+  display_name: 'Claude Advisor'
+  short_description: 'Run independent reviews in one read-only Claude CLI session'
+  default_prompt: 'Use $claude-advisor to start or continue an independent read-only Claude review.'

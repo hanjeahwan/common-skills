@@ -1,0 +1,129 @@
+{
+  "schema_version": "1.0",
+  "seed": "yao-output-eval-blind-v1",
+  "summary": {
+    "pair_count": 3,
+    "answer_key_separate": true,
+    "with_skill_hidden_count": 3
+  },
+  "pairs": [
+    {
+      "case_id": "bootstrap-without-empty-domains",
+      "prompt": "Review the attached bootstrap request. Return exactly four lines: DECISION: <APPLY|PARTIAL|REJECT>; DOCUMENTATION_ENTRY: <repository-relative path>; CHANGES: <semicolon-separated actions>; VALIDATION: <comma-separated checks>.",
+      "input_files": [
+        "fixtures/bootstrap-migration/README.md",
+        "fixtures/bootstrap-migration/docs/api.md",
+        "fixtures/bootstrap-migration/migration-contract.md"
+      ],
+      "metadata": {
+        "case_type": "boundary",
+        "output contract": "four-line bootstrap decision"
+      },
+      "review_instruction": "Pick A or B based only on the rubric. Do not infer which output came from the skill.",
+      "rubric": [
+        {
+          "id": "rejects-overbuild",
+          "description": "Accepts bootstrap but rejects speculative empty domains.",
+          "weight": 1.0
+        },
+        {
+          "id": "follows-migration-entry",
+          "description": "Uses the project-designated documentation entry.",
+          "weight": 1.0
+        },
+        {
+          "id": "validates-bootstrap",
+          "description": "Checks the migration and documentation-system invariants.",
+          "weight": 1.0
+        }
+      ],
+      "variant_a": {
+        "blind_id": "bootstrap-without-empty-domains:A",
+        "output": "DECISION: PARTIAL\nDOCUMENTATION_ENTRY: docs/README.md\nCHANGES: perform the approved README.md to docs/README.md migration; route docs/api.md through docs/README.md; create no empty domains\nVALIDATION: target topology, reachability, broken links, duplicate truth"
+      },
+      "variant_b": {
+        "blind_id": "bootstrap-without-empty-domains:B",
+        "output": "DECISION: APPLY\nDOCUMENTATION_ENTRY: docs/README.md\nCHANGES: create docs/README.md; create docs/facts/; create docs/proposals/; create docs/decisions/\nVALIDATION: links"
+      }
+    },
+    {
+      "case_id": "reject-parallel-domain-entry",
+      "prompt": "Review the attached Facts entry request. Return exactly four lines: DECISION: <APPLY|PARTIAL|REJECT>; DOMAIN_ENTRY: <repository-relative path>; CHANGES: <semicolon-separated actions>; VALIDATION: <comma-separated checks>.",
+      "input_files": [
+        "fixtures/parallel-entry/docs/README.md",
+        "fixtures/parallel-entry/docs/facts/README.md",
+        "fixtures/parallel-entry/docs/facts/api-behavior.md",
+        "fixtures/parallel-entry/request.md"
+      ],
+      "metadata": {
+        "case_type": "boundary",
+        "output contract": "four-line domain-entry decision"
+      },
+      "review_instruction": "Pick A or B based only on the rubric. Do not infer which output came from the skill.",
+      "rubric": [
+        {
+          "id": "rejects-parallel-entry",
+          "description": "Rejects a second stable entry.",
+          "weight": 1.0
+        },
+        {
+          "id": "keeps-owner",
+          "description": "Keeps the existing domain owner.",
+          "weight": 1.0
+        },
+        {
+          "id": "validates-owner",
+          "description": "Checks ownership and reachability effects.",
+          "weight": 1.0
+        }
+      ],
+      "variant_a": {
+        "blind_id": "reject-parallel-domain-entry:A",
+        "output": "DECISION: REJECT\nDOMAIN_ENTRY: docs/facts/README.md\nCHANGES: keep the existing domain entry; do not create docs/facts.md\nVALIDATION: reachability, duplicate truth, domain entry uniqueness"
+      },
+      "variant_b": {
+        "blind_id": "reject-parallel-domain-entry:B",
+        "output": "DECISION: APPLY\nDOMAIN_ENTRY: docs/facts.md\nCHANGES: create docs/facts.md; copy topic links; retain docs/facts/README.md\nVALIDATION: links"
+      }
+    },
+    {
+      "case_id": "migrate-implemented-proposal-truth",
+      "prompt": "Review the attached implemented Proposal request. Return exactly four lines: DECISION: <APPLY|PARTIAL|REJECT>; CURRENT_TRUTH_OWNER: <repository-relative path>; CHANGES: <semicolon-separated actions>; VALIDATION: <comma-separated checks>.",
+      "input_files": [
+        "fixtures/implemented-proposal/docs/api.md",
+        "fixtures/implemented-proposal/proposals/P001-timeout.md",
+        "fixtures/implemented-proposal/request.md"
+      ],
+      "metadata": {
+        "case_type": "boundary",
+        "output contract": "four-line lifecycle decision"
+      },
+      "review_instruction": "Pick A or B based only on the rubric. Do not infer which output came from the skill.",
+      "rubric": [
+        {
+          "id": "rejects-history-as-current-truth",
+          "description": "Rejects leaving current truth only in Proposal history.",
+          "weight": 1.0
+        },
+        {
+          "id": "updates-current-owner",
+          "description": "Routes the current contract to its owner.",
+          "weight": 1.0
+        },
+        {
+          "id": "validates-lifecycle",
+          "description": "Checks truth and lifecycle boundaries.",
+          "weight": 1.0
+        }
+      ],
+      "variant_a": {
+        "blind_id": "migrate-implemented-proposal-truth:A",
+        "output": "DECISION: REJECT\nCURRENT_TRUTH_OWNER: docs/api.md\nCHANGES: set the current timeout to 45 in docs/api.md; keep the implemented Proposal as history\nVALIDATION: current truth, Proposal lifecycle, duplicate truth"
+      },
+      "variant_b": {
+        "blind_id": "migrate-implemented-proposal-truth:B",
+        "output": "DECISION: APPLY\nCURRENT_TRUTH_OWNER: proposals/P001-timeout.md\nCHANGES: update Proposal status and Outcome; leave docs/api.md unchanged\nVALIDATION: Proposal fields"
+      }
+    }
+  ]
+}

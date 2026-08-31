@@ -1,0 +1,4 @@
+DECISION: PARTIAL
+CURRENT_TRUTH_OWNER: fixtures/implemented-proposal/docs/api.md
+CHANGES: update docs/api.md timeout from 30 to 45 seconds; retain Proposal as historical implementation record
+VALIDATION: confirm docs/api.md states 45 seconds, verify requests may run for 45 seconds

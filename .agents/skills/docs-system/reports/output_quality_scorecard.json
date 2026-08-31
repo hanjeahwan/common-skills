@@ -1,0 +1,445 @@
+{
+  "ok": true,
+  "cases": "/Users/codeartz/workspaces/rundo-biz/pmms-test-cases/.agents/skills/docs-system/evals/output/cases.jsonl",
+  "summary": {
+    "case_count": 3,
+    "file_backed_case_count": 3,
+    "near_neighbor_case_count": 0,
+    "boundary_case_count": 3,
+    "baseline_pass_rate": 0.0,
+    "with_skill_pass_rate": 100.0,
+    "delta": 100.0,
+    "regression_count": 0,
+    "gate_pass": true,
+    "failure_taxonomy": [],
+    "blind_pair_count": 3
+  },
+  "results": [
+    {
+      "id": "bootstrap-without-empty-domains",
+      "prompt": "Review the attached bootstrap request. Return exactly four lines: DECISION: <APPLY|PARTIAL|REJECT>; DOCUMENTATION_ENTRY: <repository-relative path>; CHANGES: <semicolon-separated actions>; VALIDATION: <comma-separated checks>.",
+      "input_files": [
+        "fixtures/bootstrap-migration/README.md",
+        "fixtures/bootstrap-migration/docs/api.md",
+        "fixtures/bootstrap-migration/migration-contract.md"
+      ],
+      "metadata": {
+        "case_type": "boundary",
+        "output contract": "four-line bootstrap decision"
+      },
+      "baseline": {
+        "score": 0.0,
+        "passed_count": 0,
+        "failed_count": 3,
+        "checks": [
+          {
+            "id": "rejects-overbuild",
+            "description": "Accepts bootstrap but rejects speculative empty domains.",
+            "weight": 1.0,
+            "failure_type": "empty_domain_overbuild",
+            "passed": false,
+            "missing": [
+              "DECISION: PARTIAL",
+              "create no empty domains"
+            ],
+            "present_forbidden": [
+              "create docs/facts/; create docs/proposals/; create docs/decisions/"
+            ]
+          },
+          {
+            "id": "follows-migration-entry",
+            "description": "Uses the project-designated documentation entry.",
+            "weight": 1.0,
+            "failure_type": "ignored_migration",
+            "passed": false,
+            "missing": [
+              "approved README.md to docs/README.md migration"
+            ],
+            "present_forbidden": []
+          },
+          {
+            "id": "validates-bootstrap",
+            "description": "Checks the migration and documentation-system invariants.",
+            "weight": 1.0,
+            "failure_type": "missing_verification",
+            "passed": false,
+            "missing": [
+              "target topology",
+              "reachability",
+              "broken links",
+              "duplicate truth"
+            ],
+            "present_forbidden": []
+          }
+        ],
+        "failed": [
+          {
+            "id": "rejects-overbuild",
+            "description": "Accepts bootstrap but rejects speculative empty domains.",
+            "weight": 1.0,
+            "failure_type": "empty_domain_overbuild",
+            "passed": false,
+            "missing": [
+              "DECISION: PARTIAL",
+              "create no empty domains"
+            ],
+            "present_forbidden": [
+              "create docs/facts/; create docs/proposals/; create docs/decisions/"
+            ]
+          },
+          {
+            "id": "follows-migration-entry",
+            "description": "Uses the project-designated documentation entry.",
+            "weight": 1.0,
+            "failure_type": "ignored_migration",
+            "passed": false,
+            "missing": [
+              "approved README.md to docs/README.md migration"
+            ],
+            "present_forbidden": []
+          },
+          {
+            "id": "validates-bootstrap",
+            "description": "Checks the migration and documentation-system invariants.",
+            "weight": 1.0,
+            "failure_type": "missing_verification",
+            "passed": false,
+            "missing": [
+              "target topology",
+              "reachability",
+              "broken links",
+              "duplicate truth"
+            ],
+            "present_forbidden": []
+          }
+        ]
+      },
+      "with_skill": {
+        "score": 100.0,
+        "passed_count": 3,
+        "failed_count": 0,
+        "checks": [
+          {
+            "id": "rejects-overbuild",
+            "description": "Accepts bootstrap but rejects speculative empty domains.",
+            "weight": 1.0,
+            "failure_type": "empty_domain_overbuild",
+            "passed": true,
+            "missing": [],
+            "present_forbidden": []
+          },
+          {
+            "id": "follows-migration-entry",
+            "description": "Uses the project-designated documentation entry.",
+            "weight": 1.0,
+            "failure_type": "ignored_migration",
+            "passed": true,
+            "missing": [],
+            "present_forbidden": []
+          },
+          {
+            "id": "validates-bootstrap",
+            "description": "Checks the migration and documentation-system invariants.",
+            "weight": 1.0,
+            "failure_type": "missing_verification",
+            "passed": true,
+            "missing": [],
+            "present_forbidden": []
+          }
+        ],
+        "failed": []
+      },
+      "delta": 100.0,
+      "winner": "with_skill",
+      "failure_taxonomy": []
+    },
+    {
+      "id": "reject-parallel-domain-entry",
+      "prompt": "Review the attached Facts entry request. Return exactly four lines: DECISION: <APPLY|PARTIAL|REJECT>; DOMAIN_ENTRY: <repository-relative path>; CHANGES: <semicolon-separated actions>; VALIDATION: <comma-separated checks>.",
+      "input_files": [
+        "fixtures/parallel-entry/docs/README.md",
+        "fixtures/parallel-entry/docs/facts/README.md",
+        "fixtures/parallel-entry/docs/facts/api-behavior.md",
+        "fixtures/parallel-entry/request.md"
+      ],
+      "metadata": {
+        "case_type": "boundary",
+        "output contract": "four-line domain-entry decision"
+      },
+      "baseline": {
+        "score": 0.0,
+        "passed_count": 0,
+        "failed_count": 3,
+        "checks": [
+          {
+            "id": "rejects-parallel-entry",
+            "description": "Rejects a second stable entry.",
+            "weight": 1.0,
+            "failure_type": "parallel_entry",
+            "passed": false,
+            "missing": [
+              "DECISION: REJECT",
+              "do not create docs/facts.md"
+            ],
+            "present_forbidden": [
+              "DOMAIN_ENTRY: docs/facts.md"
+            ]
+          },
+          {
+            "id": "keeps-owner",
+            "description": "Keeps the existing domain owner.",
+            "weight": 1.0,
+            "failure_type": "wrong_owner",
+            "passed": false,
+            "missing": [
+              "DOMAIN_ENTRY: docs/facts/README.md"
+            ],
+            "present_forbidden": []
+          },
+          {
+            "id": "validates-owner",
+            "description": "Checks ownership and reachability effects.",
+            "weight": 1.0,
+            "failure_type": "missing_verification",
+            "passed": false,
+            "missing": [
+              "reachability",
+              "duplicate truth",
+              "domain entry uniqueness"
+            ],
+            "present_forbidden": []
+          }
+        ],
+        "failed": [
+          {
+            "id": "rejects-parallel-entry",
+            "description": "Rejects a second stable entry.",
+            "weight": 1.0,
+            "failure_type": "parallel_entry",
+            "passed": false,
+            "missing": [
+              "DECISION: REJECT",
+              "do not create docs/facts.md"
+            ],
+            "present_forbidden": [
+              "DOMAIN_ENTRY: docs/facts.md"
+            ]
+          },
+          {
+            "id": "keeps-owner",
+            "description": "Keeps the existing domain owner.",
+            "weight": 1.0,
+            "failure_type": "wrong_owner",
+            "passed": false,
+            "missing": [
+              "DOMAIN_ENTRY: docs/facts/README.md"
+            ],
+            "present_forbidden": []
+          },
+          {
+            "id": "validates-owner",
+            "description": "Checks ownership and reachability effects.",
+            "weight": 1.0,
+            "failure_type": "missing_verification",
+            "passed": false,
+            "missing": [
+              "reachability",
+              "duplicate truth",
+              "domain entry uniqueness"
+            ],
+            "present_forbidden": []
+          }
+        ]
+      },
+      "with_skill": {
+        "score": 100.0,
+        "passed_count": 3,
+        "failed_count": 0,
+        "checks": [
+          {
+            "id": "rejects-parallel-entry",
+            "description": "Rejects a second stable entry.",
+            "weight": 1.0,
+            "failure_type": "parallel_entry",
+            "passed": true,
+            "missing": [],
+            "present_forbidden": []
+          },
+          {
+            "id": "keeps-owner",
+            "description": "Keeps the existing domain owner.",
+            "weight": 1.0,
+            "failure_type": "wrong_owner",
+            "passed": true,
+            "missing": [],
+            "present_forbidden": []
+          },
+          {
+            "id": "validates-owner",
+            "description": "Checks ownership and reachability effects.",
+            "weight": 1.0,
+            "failure_type": "missing_verification",
+            "passed": true,
+            "missing": [],
+            "present_forbidden": []
+          }
+        ],
+        "failed": []
+      },
+      "delta": 100.0,
+      "winner": "with_skill",
+      "failure_taxonomy": []
+    },
+    {
+      "id": "migrate-implemented-proposal-truth",
+      "prompt": "Review the attached implemented Proposal request. Return exactly four lines: DECISION: <APPLY|PARTIAL|REJECT>; CURRENT_TRUTH_OWNER: <repository-relative path>; CHANGES: <semicolon-separated actions>; VALIDATION: <comma-separated checks>.",
+      "input_files": [
+        "fixtures/implemented-proposal/docs/api.md",
+        "fixtures/implemented-proposal/proposals/P001-timeout.md",
+        "fixtures/implemented-proposal/request.md"
+      ],
+      "metadata": {
+        "case_type": "boundary",
+        "output contract": "four-line lifecycle decision"
+      },
+      "baseline": {
+        "score": 0.0,
+        "passed_count": 0,
+        "failed_count": 3,
+        "checks": [
+          {
+            "id": "rejects-history-as-current-truth",
+            "description": "Rejects leaving current truth only in Proposal history.",
+            "weight": 1.0,
+            "failure_type": "proposal_as_current_truth",
+            "passed": false,
+            "missing": [
+              "DECISION: REJECT",
+              "keep the implemented Proposal as history"
+            ],
+            "present_forbidden": [
+              "leave docs/api.md unchanged"
+            ]
+          },
+          {
+            "id": "updates-current-owner",
+            "description": "Routes the current contract to its owner.",
+            "weight": 1.0,
+            "failure_type": "stale_current_owner",
+            "passed": false,
+            "missing": [
+              "CURRENT_TRUTH_OWNER: docs/api.md",
+              "current timeout to 45"
+            ],
+            "present_forbidden": []
+          },
+          {
+            "id": "validates-lifecycle",
+            "description": "Checks truth and lifecycle boundaries.",
+            "weight": 1.0,
+            "failure_type": "missing_verification",
+            "passed": false,
+            "missing": [
+              "current truth",
+              "Proposal lifecycle",
+              "duplicate truth"
+            ],
+            "present_forbidden": []
+          }
+        ],
+        "failed": [
+          {
+            "id": "rejects-history-as-current-truth",
+            "description": "Rejects leaving current truth only in Proposal history.",
+            "weight": 1.0,
+            "failure_type": "proposal_as_current_truth",
+            "passed": false,
+            "missing": [
+              "DECISION: REJECT",
+              "keep the implemented Proposal as history"
+            ],
+            "present_forbidden": [
+              "leave docs/api.md unchanged"
+            ]
+          },
+          {
+            "id": "updates-current-owner",
+            "description": "Routes the current contract to its owner.",
+            "weight": 1.0,
+            "failure_type": "stale_current_owner",
+            "passed": false,
+            "missing": [
+              "CURRENT_TRUTH_OWNER: docs/api.md",
+              "current timeout to 45"
+            ],
+            "present_forbidden": []
+          },
+          {
+            "id": "validates-lifecycle",
+            "description": "Checks truth and lifecycle boundaries.",
+            "weight": 1.0,
+            "failure_type": "missing_verification",
+            "passed": false,
+            "missing": [
+              "current truth",
+              "Proposal lifecycle",
+              "duplicate truth"
+            ],
+            "present_forbidden": []
+          }
+        ]
+      },
+      "with_skill": {
+        "score": 100.0,
+        "passed_count": 3,
+        "failed_count": 0,
+        "checks": [
+          {
+            "id": "rejects-history-as-current-truth",
+            "description": "Rejects leaving current truth only in Proposal history.",
+            "weight": 1.0,
+            "failure_type": "proposal_as_current_truth",
+            "passed": true,
+            "missing": [],
+            "present_forbidden": []
+          },
+          {
+            "id": "updates-current-owner",
+            "description": "Routes the current contract to its owner.",
+            "weight": 1.0,
+            "failure_type": "stale_current_owner",
+            "passed": true,
+            "missing": [],
+            "present_forbidden": []
+          },
+          {
+            "id": "validates-lifecycle",
+            "description": "Checks truth and lifecycle boundaries.",
+            "weight": 1.0,
+            "failure_type": "missing_verification",
+            "passed": true,
+            "missing": [],
+            "present_forbidden": []
+          }
+        ],
+        "failed": []
+      },
+      "delta": 100.0,
+      "winner": "with_skill",
+      "failure_taxonomy": []
+    }
+  ],
+  "failures": [],
+  "blind_review": {
+    "pack": "/Users/codeartz/workspaces/rundo-biz/pmms-test-cases/.agents/skills/docs-system/reports/output_blind_review_pack.json",
+    "answer_key": "/Users/codeartz/workspaces/rundo-biz/pmms-test-cases/.agents/skills/docs-system/reports/output_blind_answer_key.json",
+    "pair_count": 3
+  },
+  "artifacts": {
+    "json": "/Users/codeartz/workspaces/rundo-biz/pmms-test-cases/.agents/skills/docs-system/reports/output_quality_scorecard.json",
+    "markdown": "/Users/codeartz/workspaces/rundo-biz/pmms-test-cases/.agents/skills/docs-system/reports/output_quality_scorecard.md",
+    "blind_review_pack_json": "/Users/codeartz/workspaces/rundo-biz/pmms-test-cases/.agents/skills/docs-system/reports/output_blind_review_pack.json",
+    "blind_review_pack_md": "/Users/codeartz/workspaces/rundo-biz/pmms-test-cases/.agents/skills/docs-system/reports/output_blind_review_pack.md",
+    "blind_answer_key_json": "/Users/codeartz/workspaces/rundo-biz/pmms-test-cases/.agents/skills/docs-system/reports/output_blind_answer_key.json"
+  }
+}
