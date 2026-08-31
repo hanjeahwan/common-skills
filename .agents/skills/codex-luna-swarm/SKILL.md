@@ -1,6 +1,6 @@
 ---
 name: codex-luna-swarm
-description: Orchestrate parallel coding work with GPT-5.6 Sol as the sole coordinator and mandatory code reviewer while GPT-5.6 Luna workers run at max reasoning effort. Use when a coding task has multiple independent investigation or implementation units, or when the user asks for a Luna swarm, Codex-Luna swarm, parallel Luna agents, or Sol-reviewed subagents. Do not use for small or tightly coupled work where delegation adds no useful parallelism.
+description: Start or continue parallel coding work with GPT-5.6 Sol as the sole coordinator and mandatory code reviewer while GPT-5.6 Luna workers run at max reasoning effort. Use when a coding task has multiple independent investigation or implementation units; when the user asks for a Luna swarm, Codex-Luna swarm, parallel Luna agents, or Sol-reviewed subagents; or when a follow-up continues, repairs, validates, or reviews work already started with this Skill. Do not fan out small or tightly coupled work where delegation adds no useful parallelism.
 ---
 
 # Codex–Luna Swarm
@@ -41,6 +41,31 @@ flowchart TD
 - Every code change must pass Sol's direct review. A Luna summary, test result, or self-review cannot replace this gate.
 - Use the smallest useful worker set. Do not create a swarm when the task lacks at least two genuinely independent work units.
 - Preserve the current authorization and safety boundaries. Never delegate approval decisions or use delegation to broaden scope.
+
+## Multi-turn Continuation
+
+A follow-up remains part of the existing Swarm when it continues, repairs,
+validates, or reviews the same user-visible task. The user does not need to
+repeat `$codex-luna-swarm`.
+
+At the start of a related follow-up:
+
+1. Inspect the known and live agent tree before creating workers.
+2. Reuse a relevant Luna worker when its prior context materially helps. Send
+   the follow-up to that worker instead of creating a duplicate session.
+3. If a relevant worker is already running, update its bounded task rather than
+   assigning the same work elsewhere.
+4. Create a replacement or additional Luna only for a proven independent work
+   unit, using the complete task packet and required model profile.
+5. If the remaining work is small or tightly coupled, Sol handles it directly;
+   the integration, review, and validation gates still apply.
+6. Never guess a missing worker identity or claim continuity that the live agent
+   tree and conversation do not establish.
+
+Continuity ends when the user changes the goal, explicitly ends the Swarm, the
+task is complete with no follow-up work, or the remaining task no longer belongs
+to the same user-visible outcome. Do not create a persistent session registry or
+duplicate lifecycle state to preserve continuity.
 
 ## Workflow
 
