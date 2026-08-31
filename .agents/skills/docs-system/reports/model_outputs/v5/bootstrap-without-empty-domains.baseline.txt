@@ -1,4 +1,0 @@
-DECISION: PARTIAL
-DOCUMENTATION_ENTRY: docs/README.md
-CHANGES: Create docs/README.md; route documentation from README.md through docs/README.md; do not create empty docs/facts/, docs/proposals/, or docs/decisions/ directories
-VALIDATION: README.md remains the project entry, docs/README.md is the documentation entry, current documentation artifacts have an owning domain

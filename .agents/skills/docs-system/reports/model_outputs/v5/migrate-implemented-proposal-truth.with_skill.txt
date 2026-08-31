@@ -1,4 +1,0 @@
-DECISION: REJECT
-CURRENT_TRUTH_OWNER: docs/api.md
-CHANGES: Do not leave docs/api.md unchanged; update the canonical timeout to 45 seconds; retain proposals/P001-timeout.md as historical record
-VALIDATION: proposals/P001-timeout.md status is implemented, proposals/P001-timeout.md records 45 seconds, docs/api.md currently records 30 seconds

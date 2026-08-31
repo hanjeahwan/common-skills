@@ -1,0 +1,4 @@
+interface:
+  display_name: "Documentation System"
+  short_description: "Govern documentation ownership, terminology, and prose"
+  default_prompt: "Use $docs-system to route this durable documentation change through its canonical owner, terminology, and prose rules, then validate the result."

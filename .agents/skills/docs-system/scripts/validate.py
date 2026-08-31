@@ -26,7 +26,7 @@ Usage:
 - Self-validation: <root> is this skill's directory (auto-detected when the
   scanned root contains SKILL.md at its top level).
 - <root>/.agents/skills/docs-system/tests (or <root>/tests in self-scan) is
-  fixture content and never participates in a normal project scan.
+  test content and never participates in a normal project scan.
 """
 from __future__ import annotations
 
@@ -59,9 +59,9 @@ INDEX_HEADERS = [
     ["Question", "Record"],
     ["Postmortem", "Lesson"],
 ]
-SKILL_SECTIONS = [
-    "Mission", "Principles", "Heuristics", "Hard Constraints", "Workflow",
-    "Verification",
+SKILL_REQUIRED_SECTIONS = [
+    "Mission", "Principles", "Resource Guide", "Workflow", "Boundaries",
+    "Quality Standard",
 ]
 PROPOSAL_STATUSES = {"draft", "accepted", "implemented", "rejected", "superseded"}
 TERMINAL_STATUSES = {"implemented", "rejected", "superseded"}
@@ -102,8 +102,7 @@ def walk_md(root: str):
         parts = [] if rel_base == "." else rel_base.split(os.sep)
         is_test_fixture = parts[-1:] == ["tests"] and (
             self_scan or ("docs-system" in parts and ".agents" in parts))
-        is_output_fixture = parts[-3:] == ["evals", "output", "fixtures"]
-        if is_test_fixture or is_output_fixture:
+        if is_test_fixture:
             dirs[:] = []
             continue
         for name in sorted(files):
@@ -416,13 +415,19 @@ def check_skill(root: str, errors: list[str]) -> None:
                     f"SKILL.md: front matter requires a non-empty `{field}` "
                     f"(used for skill discovery and routing)")
     headings = H2_RE.findall(text)
-    if headings != SKILL_SECTIONS:
+    observed_required = [
+        heading for heading in headings if heading in SKILL_REQUIRED_SECTIONS
+    ]
+    if observed_required != SKILL_REQUIRED_SECTIONS:
         errors.append(
-            f"SKILL.md: expected sections {SKILL_SECTIONS}, got {headings}")
+            "SKILL.md: required sections must appear once and in order: "
+            f"{SKILL_REQUIRED_SECTIONS}; got {observed_required}")
     for name in ("references/standard.md", "references/prose.md",
+                 "references/workflow.md",
                  "scripts/validate.py", "templates/proposal.md",
                  "templates/decision.md", "templates/runbook.md",
-                 "templates/index.md", "tests/test_validate.py"):
+                 "templates/index.md", "tests/test_validate.py",
+                 "tests/cases.md"):
         if not os.path.exists(os.path.join(root, name)):
             errors.append(f"{name}: missing required skill artifact")
 

@@ -1,4 +1,0 @@
-DECISION: APPLY
-DOCUMENTATION_ENTRY: docs/README.md
-CHANGES: Create docs/README.md as the project documentation entry; route README.md through docs/README.md; link docs/README.md to docs/api.md; do not create empty docs/facts/, docs/proposals/, or docs/decisions/ directories
-VALIDATION: README.md -> docs/README.md -> docs/api.md reachability, migration-contract.md compliance, no empty documentation domains created

@@ -363,11 +363,22 @@ class ValidatorTests(unittest.TestCase):
     def test_invalid_skill_anatomy_fails_self_validation(self) -> None:
         def mutate(root: Path) -> None:
             path = root / "SKILL.md"
-            path.write_text(path.read_text().replace("## Mission", "## Purpose", 1))
+            path.write_text(
+                path.read_text().replace("## Boundaries", "## Notes", 1))
 
         result = self.self_validate(mutate)
         self.assertNotEqual(result.returncode, 0, result.stdout)
-        self.assertIn("SKILL.md: expected sections", result.stdout)
+        self.assertIn("SKILL.md: required sections", result.stdout)
+
+    def test_additional_skill_section_passes_self_validation(self) -> None:
+        def mutate(root: Path) -> None:
+            path = root / "SKILL.md"
+            path.write_text(
+                path.read_text().replace(
+                    "## Quality Standard", "## Local Notes\n\nNone.\n\n## Quality Standard", 1))
+
+        result = self.self_validate(mutate)
+        self.assertEqual(result.returncode, 0, result.stdout)
 
     def test_missing_tests_fail_self_validation(self) -> None:
         def mutate(root: Path) -> None:
@@ -377,11 +388,9 @@ class ValidatorTests(unittest.TestCase):
         self.assertNotEqual(result.returncode, 0, result.stdout)
         self.assertIn("tests/test_validate.py: missing required skill artifact", result.stdout)
 
-    def test_negative_fixtures_do_not_pollute_normal_scan(self) -> None:
+    def test_test_fixtures_do_not_pollute_normal_scan(self) -> None:
         result = self.validate({
             ".agents/skills/docs-system/tests/P001-invalid.md": "invalid",
-            ".agents/skills/docs-system/evals/output/fixtures/"
-            "P002-invalid.md": "invalid",
             "README.md": "# Project\n",
         })
         self.assertEqual(result.returncode, 0, result.stdout)

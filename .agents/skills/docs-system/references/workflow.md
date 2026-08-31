@@ -46,10 +46,11 @@ documentation entry or clear canonical owners.
 8. Update domain entry, project entry and backlinks only when topology changes.
 9. Apply `prose.md`, reusable templates and project-local contracts.
 10. Run generic and project validation, then report changed owners, routing,
-    lifecycle, removed duplicates and validation evidence.
+    lifecycle, terminology or meaning effects, removed duplicates and
+    validation evidence.
 11. When real use exposes a repeatable failure, add the smallest regression at
-    its owner: routing failures to trigger evals, workflow failures to output
-    evals, and deterministic validator failures to unit tests.
+    its owner: routing and workflow failures to `tests/cases.md`, and
+    deterministic validator failures to `tests/test_validate.py`.
 
 ## Integration boundary
 

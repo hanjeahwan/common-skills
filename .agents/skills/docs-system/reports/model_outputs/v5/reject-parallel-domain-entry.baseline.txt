@@ -1,4 +1,0 @@
-DECISION: REJECT
-DOMAIN_ENTRY: docs/facts.md
-CHANGES: reject duplicate parallel entry; retain docs/facts/README.md as the canonical entry; make no repository changes
-VALIDATION: verify no duplicate domain entry is created, verify existing topic links remain intact

@@ -313,8 +313,11 @@ Non-owner documents MAY summarize for navigation/onboarding, but MUST:
 ## 10. Generic validator
 
 ```bash
-python3 .agents/skills/docs-system/scripts/validate.py <root>
+python3 <skill-root>/scripts/validate.py <documentation-root>
 ```
+
+Resolve `<skill-root>` to the active `docs-system` directory. The target
+repository does not need to contain its own copy of the Skill.
 
 The validator only enforces reusable deterministic contracts that can be
 judged from the artifact/path itself. It does not import project modules, does
