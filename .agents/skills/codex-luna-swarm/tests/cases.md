@@ -118,6 +118,19 @@ Expected invariants:
 - The repair has a concrete defect and acceptance condition.
 - The repaired result returns through integration, full Sol coordinator review, and validation.
 
+## Sol coordinator reviews its own code
+
+Initial state:
+
+- No split satisfied the Swarm condition, so the Sol coordinator implemented the change itself.
+
+Expected invariants:
+
+- The Sol coordinator puts its own code through the same review gate as delegated code.
+- The Sol coordinator does not exempt or soften the gate because it already knows the intent.
+- The Sol coordinator does not spawn a separate reviewer.
+- The Sol coordinator states that the change was self-reviewed.
+
 ## Small remaining correction
 
 Initial state:

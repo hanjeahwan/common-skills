@@ -44,7 +44,7 @@ Use `Sol coordinator` as the canonical name for the coordinating and reviewing a
 - Every Luna worker is spawned with `model: "gpt-5.6-luna"`, `reasoning_effort: "max"`, and `fork_turns: "none"`.
 - Luna workers must not spawn subagents.
 - Luna workers must not accept another Luna worker's code as reviewed.
-- Every code change must pass the Sol coordinator's direct review. A Luna worker summary, test result, or self-review cannot replace this gate.
+- Every code change must pass the Sol coordinator's direct review, including code the Sol coordinator wrote or repaired itself. A Luna worker's summary, test result, or self-assessment cannot replace this gate.
 - When this Skill is invoked, the Sol coordinator must evaluate the task against the Swarm condition in Step 1 before proceeding alone.
 - Never invent work merely to increase the Luna worker count.
 - The Sol coordinator retains every approval decision.
@@ -154,6 +154,8 @@ The Sol coordinator personally reviews the combined result before declaring succ
 4. Run the available tests, type checks, builds, and lint that cover the changed behavior and affected paths.
 5. Confirm the original problem is resolved and important normal paths still work.
 
+- Self-authored condition: The Sol coordinator implemented or repaired part of the change itself.
+- Self-authored action: Put that code through this same gate. Knowing the intent behind a change is not evidence that it is correct, so read it as adversarially as delegated code and state that it was self-reviewed.
 - Review-failure action: The Sol coordinator identifies a concrete defect and acceptance condition.
 - Luna worker repair condition: The prior Luna worker's context is needed for the repair.
 - Luna worker repair action: Send the focused repair to that Luna worker.
