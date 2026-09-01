@@ -1,0 +1,4 @@
+interface:
+  display_name: "Orca–Luna Swarm"
+  short_description: "Supervise Orca Luna workers with coordinator review"
+  default_prompt: "Use $orca-luna-swarm for this coding task. Act as the coordinator, supervise parallel GPT-5.6 Luna workers at max reasoning effort through Orca orchestration, delegate noisy investigation so your own context stays clean, and personally review the integrated result before delivery."

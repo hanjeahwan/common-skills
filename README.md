@@ -18,6 +18,13 @@ Project-local Codex skills for durable goal execution and parallel coding with a
 - [Skill instructions](.agents/skills/codex-luna-swarm/SKILL.md)
 - [Behavior cases](.agents/skills/codex-luna-swarm/tests/cases.md)
 
+### Orca–Luna Swarm
+
+`$orca-luna-swarm` runs the same pattern inside Orca: whichever agent invokes it is the coordinator, each Luna worker is a supervised Orca Dispatch, noisy investigation is delegated so the coordinator's context stays clean, and the coordinator personally reviews the integrated code before delivery.
+
+- [Skill instructions](.agents/skills/orca-luna-swarm/SKILL.md)
+- [Behavior cases](.agents/skills/orca-luna-swarm/tests/cases.md)
+
 ### Claude Advisor
 
 `$claude-advisor` runs an independent, read-only Claude review with stable finding IDs and resumable follow-up review.
