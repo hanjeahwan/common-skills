@@ -17,6 +17,7 @@ Use a structured contract for goal semantics and the native Codex Goal for lifec
 ## Invariants
 
 - Preserve the approved L0 Objective and L1 Acceptance Criteria.
+- Propose an L1 refinement when current evidence contradicts an Acceptance Criterion or shows that no authorized action can satisfy it.
 - To refine L0 or L1, propose the exact change and supporting evidence.
 - Apply an L0 or L1 refinement only after explicit user approval.
 - Change the L2 approach or current iteration target when new evidence invalidates the current approach.

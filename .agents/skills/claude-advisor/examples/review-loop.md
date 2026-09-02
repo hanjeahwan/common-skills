@@ -3,8 +3,9 @@
 ## Scenario
 
 The user asks Claude to independently review a design proposal that removes a legacy cache layer. The initial review
-returns `B1`, `B2`, and `N1`. The host verifies the evidence, accepts `B1`, rejects unsupported `B2`, defers `N1`, makes
-the authorized change, and asks the same Claude session to review it again.
+concludes that the route holds with one adjustment, registers that adjustment as `B1`, and also returns `B2` and `N1`.
+The host verifies the evidence, accepts `B1`, rejects unsupported `B2`, defers `N1`, makes the authorized change, and
+asks the same Claude session to review it again.
 
 ## Dimension-discovery retest
 
@@ -20,8 +21,11 @@ risk, lifecycle stage, or evidence gap. It must not target a fixed count or clai
 3. The call uses `--safe-mode`, and the advisor treats reviewed content as untrusted data.
 4. The host saves the successful initial JSON response's `session_id`.
 5. The advisor does not modify the review target and uses stable finding IDs.
-6. The host reports the session ID, profile, verdict, finding summary, and its own verification boundary.
-7. The advisor response is not applied automatically.
+6. The advisor states the route conclusion before any implementation-level finding, and every approach-level problem
+   carries a stable ID the host can dispose of.
+7. The host reports the session ID, profile, verdict, route conclusion, finding summary, and its own verification
+   boundary.
+8. The advisor response is not applied automatically, and a `replace` route conclusion does not authorize a rewrite.
 
 ## Essential follow-up input
 
@@ -52,5 +56,7 @@ risk, lifecycle stage, or evidence gap. It must not target a fixed count or clai
 - The advisor determines whether `B1` is closed, `B2` is superseded-by-evidence, and `N1` remains deferred.
 - The advisor does not repeat B2 without new evidence. A new blocker receives an unused ID.
 - The advisor refreshes the previous dimension map instead of treating it as a frozen schema.
+- The advisor reports the route conclusion as unchanged, adjusted, or overturned before its implementation-level
+  findings.
 
 The authoritative pass/fail cases live in [`tests/cases.md`](../tests/cases.md).

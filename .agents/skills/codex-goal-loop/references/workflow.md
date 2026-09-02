@@ -18,9 +18,15 @@ Protected Goal without explicit user approval.
 - Locator format: Use one normalized workspace-root-relative path without globs, environment variables, or parent-directory escapes.
 - Locator boundary: Keep the resolved path below the active workspace.
 - Iteration precondition: Confirm that the resolved contract exists.
+- Contract-validity precondition: Confirm that the resolved contract contains a non-empty L0 Objective and at least one identified L1 Acceptance Criterion.
 - Authority-failure condition: The native objective contains at least one locator but does not resolve exactly one normalized, workspace-contained, existing contract.
 - Authority-failure action: Stop Goal execution.
 - Authority-failure request: Request contract restoration or `/goal edit`.
+- Protected-Goal-damage condition: The resolved contract fails the contract-validity precondition.
+- Protected-Goal-damage action: Stop Goal execution.
+- Protected-Goal-damage request: Request contract restoration or `/goal edit`.
+- Working-State-damage condition: The resolved contract satisfies the contract-validity precondition and a required Working State section is missing.
+- Working-State-damage action: Restore the missing sections from [`goal-template.md`](goal-template.md) and record every acceptance entry without current evidence as `UNVERIFIED`.
 - Prohibition: Never reconstruct the contract from memory.
 
 ## Route Native Goal State
@@ -104,6 +110,7 @@ Default `.goal/` contracts resume only while the same workspace data exists. A n
 - Preserve evidence that remains valid under its invalidation conditions.
 - Re-verify evidence affected by an invalidation condition or changed time-sensitive fact.
 - Record no raw private data in the contract.
+- Record a proposed L0 or L1 refinement under `Pending External Decision` until the user approves or rejects it.
 
 When applying an approved contract refinement:
 

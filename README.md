@@ -32,6 +32,13 @@ Project-local Codex skills for durable goal execution and parallel coding with a
 - [Skill instructions](.agents/skills/claude-advisor/SKILL.md)
 - [Behavior cases](.agents/skills/claude-advisor/tests/cases.md)
 
+### Architect
+
+`$architect` reviews a repository as an independent architect, security reviewer, and code reviewer, settling whether the current approach should stand before judging any implementation detail, then stopping for the user's decision.
+
+- [Skill instructions](.agents/skills/architect/SKILL.md)
+- [Behavior cases](.agents/skills/architect/tests/cases.md)
+
 ### Docs System
 
 `$docs-system` maintains reachable repository documentation with one canonical owner and one canonical term for each maintained claim and concept.

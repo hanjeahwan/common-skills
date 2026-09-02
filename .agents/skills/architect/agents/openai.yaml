@@ -1,0 +1,4 @@
+interface:
+  display_name: "Architect"
+  short_description: "Settle the route before reviewing the implementation"
+  default_prompt: "Use $architect to review this repository as an independent architect and code reviewer, settling the route before implementation detail."

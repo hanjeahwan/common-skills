@@ -19,10 +19,10 @@ target and return traceable findings.
 
 Support exactly two model profiles:
 
-| Profile | Model | Effort | Selection |
-| --- | --- | --- | --- |
-| `fable` | `claude-fable-5` | `high` | Default when the user does not choose a profile |
-| `opus` | `claude-opus-5` | `max` | Use only when the user explicitly chooses Opus |
+| Profile | Model   | Effort | Selection |
+| --- | ----- | --- | --- |
+| `fable` | `claude-fable-5.1` | `high` | Default when the user does not choose a profile |
+| `opus` | `claude-opus-5`   | `max` | Use only when the user explicitly chooses Opus |
 
 Treat each row as an indivisible profile. Do not mix models and effort levels. A session's profile is immutable. If the
 user selects the other profile after a session starts, create a new replacement session from the previous checkpoint and
@@ -111,8 +111,13 @@ The host verifies your evidence before assigning one disposition to every findin
 Your `APPROVE` is not implementation verification, and `REVISE` does not authorize changes. If the user asks for
 implementation, the host performs it separately under the current task's rules and validates it independently.
 
+The route conclusion is advice about the approach, not a decision. A `replace` conclusion does not authorize a rewrite;
+the host and the user decide whether the route changes. Approach-level problems arrive as ordinary findings and receive
+an ordinary disposition.
+
 `APPROVE` requires no blocking finding and evidence for every acceptance check material to the review. Use `REVISE` when
-a blocking finding exists or a material acceptance check remains unverified.
+a blocking finding exists or a material acceptance check remains unverified. An `insufficient-evidence` route conclusion
+is itself a `REVISE`; the advisor states what evidence would settle the route instead of forcing a conclusion.
 
 ### 5. Resume the same session for follow-up review
 
@@ -168,16 +173,19 @@ Claude Advisor session: <session_id>
 Turn: <number>
 Profile: <fable | opus>
 Model and effort: <model> / <effort>
+Route conclusion: <keep | adjust | replace | insufficient-evidence, with the deciding reason>
 Verdict: <APPROVE | REVISE>
 Review dimensions: <selected, added, retired, and still-unverified dimensions>
 Previous findings: <status summary; "none" for the first turn>
 New findings: <IDs and one-line summaries; "none" when empty>
+Top three priorities: <ordered finding IDs; "none" when no finding requires action>
 Host verification: <verified or unverified, with evidence boundary>
+Further review value: <whether another turn is worth its cost, with the reason>
 Next decision: <only when user input is still required>
 ```
 
 ## Quality Gate
 
 Use [`tests/cases.md`](tests/cases.md) as the regression contract. A change passes only when its relevant cases preserve
-resumable session identity, immutable profiles, review-target read-only operation, evidence boundaries, verdict semantics,
-temporary prompt cleanup, and dynamic review dimensions.
+resumable session identity, immutable profiles, review-target read-only operation, evidence boundaries, verdict
+semantics, route-before-implementation ordering, temporary prompt cleanup, and dynamic review dimensions.
