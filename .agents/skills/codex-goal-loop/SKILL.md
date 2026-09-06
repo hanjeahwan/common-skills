@@ -11,7 +11,7 @@ Use one JSON contract for goal semantics and evidence state, `scripts/goal.py` f
 
 - `protected` in the referenced contract is the sole authority for the objective, acceptance criteria, constraints, non-goals, and `max_attempts`. The title is display metadata.
 - The native Codex Goal is the sole authority for goal identity, lifecycle status, budget, and usage.
-- `working` stores facts only: current approach, failed attempts, evidence, risks, and decisions. Criterion state (open, blocked, exhausted, verified) is derived by the script and never stored. No native lifecycle status is stored.
+- `working` stores facts only: current approach, steps, failed attempts, evidence, risks, and decisions. Criterion state (open, blocked, exhausted, verified) is derived by the script and never stored. No native lifecycle status is stored.
 - [`schemas/goal.schema.json`](schemas/goal.schema.json) plus the invariants in `scripts/goal.py` are the sole authority for contract shape. A contract the script rejects is not a contract.
 - Current observable repository and external state override stale checkpoint claims.
 
@@ -21,8 +21,9 @@ Use one JSON contract for goal semantics and evidence state, `scripts/goal.py` f
 - Preserve `protected`. Change any part of it only through a refinement decision the user approved, applied by `decision resolve --approve`.
 - Open a refinement decision when evidence contradicts a criterion or shows that no authorized action can satisfy it.
 - Every action must advance the criterion returned by `next`.
-- Mark a criterion verified only with observable evidence: a summary, a locator where it can be re-observed, and at least one invalidation condition.
-- On every resume, re-check each verified criterion against its invalidation conditions and current state. Run `invalidate` when a condition has occurred.
+- Mark a criterion verified only with observable evidence: a summary, a locator where it can be re-observed, and at least one invalidation condition. `verify` refuses while any step of that criterion is undone; close or drop each step explicitly.
+- Break a criterion into `steps` whose text names something re-observable: a command, a file, or an id list, never "continue". The next step is derived, not stored.
+- On every resume, re-check each verified criterion against its invalidation conditions and current state. Run `invalidate` when a condition has occurred. Re-observe what the first undone step points to before acting on it; drop steps the workspace shows are already done or no longer needed.
 - Record a failed approach with `attempt` before choosing a new one. Failure alone does not justify a blocked transition.
 - After `max_attempts` failed approaches on one criterion (default 10, stored in `protected`), the script refuses new approaches. Open a refinement or input decision instead of trying again; an approved decision on that criterion restores its attempt budget.
 - Treat context reset and execution-budget exhaustion as handoffs rather than blockers.
@@ -61,8 +62,8 @@ flowchart LR
 ```
 
 - Observe: run `status`, re-observe repository and external state, `invalidate` evidence whose invalidation condition occurred, and `risk` to add or drop open risks.
-- Decide: `next` names the single criterion to pursue, or reports that decisions are pending or completion is ready. Set or change the approach with `approach`.
-- Act: do work that advances that criterion only.
+- Decide: `next` names the single criterion to pursue and its first undone step, or reports that decisions are pending or completion is ready. Set or change the approach with `approach`; list the remaining work with `step add`.
+- Act: do the first undone step of that criterion only, then `step done`.
 - Verify: `verify` with evidence, `attempt` with the observed failure, or `decision open` when only the user can resolve the blocker.
 - The script rejects an approach the contract already records as failed. Change the hypothesis before retrying.
 - Complete: `ready` exits 0 only when every criterion is verified and no decision is open. Check each listed falsifier that is within current authority, then call `update_goal({ status: "complete" })`.

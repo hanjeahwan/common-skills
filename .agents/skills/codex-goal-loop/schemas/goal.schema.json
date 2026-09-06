@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://codeartz.xyz/schemas/codex-goal-loop/goal.schema.json",
   "title": "Codex Goal Loop contract",
-  "description": "One goal contract. `protected` is the semantic authority and changes only through an approved refinement decision. `working` stores facts only: current approach, failed attempts, evidence, risks, and decisions. Criterion state (open, blocked, exhausted, verified) is derived by scripts/goal.py and never stored. Native Codex Goal lifecycle is never stored here.",
+  "description": "One goal contract. `protected` is the semantic authority and changes only through an approved refinement decision. `working` stores facts only: current approach, steps, failed attempts, evidence, risks, and decisions. Criterion state (open, blocked, exhausted, verified) is derived by scripts/goal.py and never stored. Native Codex Goal lifecycle is never stored here.",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -128,7 +128,7 @@
       "additionalProperties": false,
       "required": [
         "approach",
-        "next_action",
+        "steps",
         "attempts",
         "evidence"
       ],
@@ -143,15 +143,32 @@
             }
           ]
         },
-        "next_action": {
-          "oneOf": [
-            {
-              "type": "null"
-            },
-            {
-              "$ref": "#/$defs/text"
+        "steps": {
+          "type": "array",
+          "description": "One-level breakdown of the work for this criterion. The next step is the first entry whose done_at is null. verify refuses while any step is undone.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "text",
+              "done_at"
+            ],
+            "properties": {
+              "text": {
+                "$ref": "#/$defs/text"
+              },
+              "done_at": {
+                "oneOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "$ref": "#/$defs/timestamp"
+                  }
+                ]
+              }
             }
-          ]
+          }
         },
         "attempts": {
           "type": "array",

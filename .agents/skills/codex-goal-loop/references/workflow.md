@@ -91,7 +91,7 @@ python3 <skill-root>/scripts/goal.py init \
 2. Run `status <contract>` and read the whole checkpoint.
 3. Re-observe relevant repository, tool, and external state.
 4. For each verified criterion, check its invalidation conditions against current evidence. Run `invalidate <contract> <id> --reason` for each condition that occurred.
-5. Run `next <contract>` and act on its result.
+5. Run `next <contract>`. Re-observe what its first undone step points to, drop steps that are already satisfied, then act.
 
 Default `.goal/` contracts resume only while the same workspace data exists. A native lifecycle handle does not make a missing local contract portable.
 
@@ -103,8 +103,9 @@ Default `.goal/` contracts resume only while the same workspace data exists. A n
 | `risk <contract> --add ... --drop N` | Observe | Add an open risk or drop a resolved one. Risks inform the agent; they do not block criteria. |
 | `invalidate <contract> A1 --reason ...` | Observe | Return a verified criterion to unverified when an invalidation condition occurred. |
 | `next <contract> [--json]` | Decide | Name the single criterion to pursue, or report pending decisions or readiness. |
-| `approach <contract> A1 --approach ... [--next-action ...]` | Decide | Set the current approach. Rejects an approach already recorded as failed, or any approach once `max_attempts` is reached. |
-| `verify <contract> A1 --summary ... --locator ... --invalidated-by ...` | Verify | Mark the criterion verified with evidence, replacing any previous evidence. Rejected while a decision blocks it. |
+| `approach <contract> A1 --approach ...` | Decide | Set the current approach. Rejects an approach already recorded as failed, or any approach once `max_attempts` is reached. |
+| `step <contract> A1 --add ... --done N --drop N` | Decide, Act | Break the criterion into re-observable steps, mark one done after doing it, or drop one the workspace shows is unnecessary. |
+| `verify <contract> A1 --summary ... --locator ... --invalidated-by ...` | Verify | Mark the criterion verified with evidence, replacing any previous evidence. Rejected while a decision blocks it or a step is undone. |
 | `attempt <contract> A1 --outcome ... [--approach ...]` | Verify | Record that the current approach failed and clear it. Recording an approach that was never set passes the same gates as `approach`. |
 | `decision open <contract> --kind refinement\|input --request ... [--blocks ...] [--target objective\|max_attempts\|constraints\|non_goals\|A1 --operation set\|add\|remove --proposed ...]` | Verify | Record a request only the user can answer. An open objective refinement blocks every criterion. |
 | `decision resolve <contract> D1 --approve\|--reject [--note ...]` | Resume | Record the user's answer. An approved refinement rewrites `protected` and invalidates affected evidence. |
@@ -112,7 +113,8 @@ Default `.goal/` contracts resume only while the same workspace data exists. A n
 | `handoff <contract> --native active\|paused\|blocked\|complete` | Handoff | Print the end-of-invocation report. |
 | `validate <contract>` | Any | Check the contract against the schema and invariants. |
 
-- Use one criterion at a time: the one `next` returns.
+- Use one criterion at a time: the one `next` returns. Within it, do one step at a time and mark it done before starting the next.
+- Write each step so a later invocation can check it from the workspace: a command to run, a file to inspect, an explicit list of ids. Steps are working state; add and drop them without approval.
 - Record every failed verification with `attempt` before changing the approach.
 - Use `decision open --kind refinement` to propose an objective or criterion change. Present the request verbatim and wait; never apply it yourself.
 - Use `--blocks` on a decision only for criteria that truly cannot advance until it is resolved. A refinement blocks its target criterion implicitly.
@@ -124,7 +126,7 @@ Default `.goal/` contracts resume only while the same workspace data exists. A n
 
 - Transition condition: `next` returns a criterion to pursue.
 - Native action: leave the native Goal active.
-- Report action: name the criterion and next action.
+- Report action: name the criterion and its next step.
 
 ### Blocked
 
@@ -157,5 +159,5 @@ Contract: <workspace-relative-path>
 Acceptance: verified [...]; unverified [...]
 Evidence: most important current observations
 Pending decision: exact external input required, if any
-Next: next criterion and action, required decision, or completion statement
+Next: next criterion and step, required decision, or completion statement
 ```

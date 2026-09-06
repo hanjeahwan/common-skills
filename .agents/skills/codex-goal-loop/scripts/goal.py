@@ -210,7 +210,16 @@ def relative(root: Path, path: Path) -> str:
 # --------------------------------------------------------------------------
 
 def new_criterion_facts() -> dict:
-    return {"approach": None, "next_action": None, "attempts": [], "evidence": None}
+    return {"approach": None, "steps": [], "attempts": [], "evidence": None}
+
+
+def undone_steps(facts: dict) -> list[dict]:
+    return [s for s in facts["steps"] if s["done_at"] is None]
+
+
+def next_step(facts: dict) -> str | None:
+    pending = undone_steps(facts)
+    return pending[0]["text"] if pending else None
 
 
 def facts_of(contract: dict, cid: str) -> dict:
@@ -333,7 +342,7 @@ def choose_next(contract: dict) -> dict:
         "statement": statement(contract, cid),
         "reason": "approach already in progress" if in_progress else "first open criterion",
         "approach": facts["approach"],
-        "next_action": facts["next_action"],
+        "next_step": next_step(facts),
         "attempts": facts["attempts"],
     }
 
@@ -446,8 +455,9 @@ def print_status(contract: dict) -> None:
         print(f"  {cid} [{state_of(contract, cid).upper()}]{flags} {item['statement']}")
         if facts["approach"]:
             print(f"      approach: {facts['approach']}")
-        if facts["next_action"]:
-            print(f"      next: {facts['next_action']}")
+        for index, step in enumerate(facts["steps"], start=1):
+            mark = "x" if step["done_at"] else " "
+            print(f"      [{mark}] {index}. {step['text']}")
         for attempt in facts["attempts"]:
             print(f"      failed: {attempt['approach']} -> {attempt['outcome']} ({attempt['observed_at']})")
         if facts["evidence"]:
@@ -487,8 +497,8 @@ def print_next(contract: dict) -> None:
         print(f"Next: pursue {choice['criterion']} ({choice['reason']}): {choice['statement']}")
         if choice["approach"]:
             print(f"  approach: {choice['approach']}")
-        if choice["next_action"]:
-            print(f"  next action: {choice['next_action']}")
+        if choice["next_step"]:
+            print(f"  next step: {choice['next_step']}")
         if choice["attempts"]:
             print(f"  failed approaches: {len(choice['attempts'])} (do not repeat them unchanged)")
 
@@ -527,7 +537,6 @@ def cmd_approach(args: argparse.Namespace) -> int:
             f"{contract['protected']['max_attempts']}; open a decision instead of trying again"
         )
     facts["approach"] = args.approach
-    facts["next_action"] = args.next_action
     save(path, contract)
     print(f"{cid}: approach set")
     return 0
@@ -555,7 +564,6 @@ def cmd_attempt(args: argparse.Namespace) -> int:
     facts["attempts"].append({"approach": approach, "outcome": args.outcome, "observed_at": now()})
     if facts["approach"] == approach:
         facts["approach"] = None
-        facts["next_action"] = None
     save(path, contract)
     limit = contract["protected"]["max_attempts"]
     tail = "limit reached, open a decision" if is_exhausted(contract, cid) else "choose a new approach"
@@ -569,13 +577,17 @@ def cmd_verify(args: argparse.Namespace) -> int:
     cid = args.criterion
     require_unblocked(contract, cid)
     facts = facts_of(contract, cid)
+    pending = undone_steps(facts)
+    if pending:
+        raise GoalError(
+            f"{cid} has {len(pending)} undone step(s); mark each `step done` or `step drop` before verifying"
+        )
     facts["evidence"] = {
         "summary": args.summary,
         "locator": args.locator,
         "observed_at": now(),
         "invalidated_by": args.invalidated_by,
     }
-    facts["next_action"] = None
     save(path, contract)
     print(f"{cid}: verified")
     print_next(contract)
@@ -592,6 +604,31 @@ def cmd_invalidate(args: argparse.Namespace) -> int:
     save(path, contract)
     print(f"{cid}: invalidated ({args.reason})")
     print_next(contract)
+    return 0
+
+
+def cmd_step(args: argparse.Namespace) -> int:
+    path = resolve_contract(args.root, args.contract)
+    contract = load(path)
+    cid = args.criterion
+    facts = facts_of(contract, cid)
+    if not (args.add or args.done or args.drop):
+        raise GoalError("nothing to change; pass --add, --done, or --drop")
+    steps = facts["steps"]
+    for index in args.done:
+        if not 1 <= index <= len(steps):
+            raise GoalError(f"{cid} step {index} does not exist")
+        if steps[index - 1]["done_at"]:
+            raise GoalError(f"{cid} step {index} is already done")
+        steps[index - 1]["done_at"] = now()
+    for index in sorted(args.drop, reverse=True):
+        if not 1 <= index <= len(steps):
+            raise GoalError(f"{cid} step {index} does not exist")
+        steps.pop(index - 1)
+    steps.extend({"text": text, "done_at": None} for text in args.add)
+    save(path, contract)
+    pending = next_step(facts)
+    print(f"{cid}: {len(undone_steps(facts))} step(s) undone" + (f"; next: {pending}" if pending else ""))
     return 0
 
 
@@ -738,8 +775,8 @@ def cmd_handoff(args: argparse.Namespace) -> int:
         next_line = f"{', '.join(choice['criteria'])} exhausted max_attempts; open a decision"
     else:
         next_line = f"pursue {choice['criterion']}"
-        if choice["next_action"]:
-            next_line += f": {choice['next_action']}"
+        if choice["next_step"]:
+            next_line += f": {choice['next_step']}"
     print(f"Native Goal as last observed: {args.native}")
     print(f"Contract: {relative(args.root, path)}")
     print(f"Acceptance: verified [{', '.join(verified) or '-'}]; unverified [{', '.join(unverified) or '-'}]")
@@ -787,8 +824,14 @@ def build_parser() -> argparse.ArgumentParser:
     p = contract_parser("approach", "set the current L2 approach for a criterion")
     p.add_argument("criterion")
     p.add_argument("--approach", required=True)
-    p.add_argument("--next-action")
     p.set_defaults(func=cmd_approach)
+
+    p = contract_parser("step", "break a criterion into steps, mark them done, or drop them")
+    p.add_argument("criterion")
+    p.add_argument("--add", action="append", default=[], metavar="TEXT", help="step text; name something re-observable (a command, file, or id list)")
+    p.add_argument("--done", action="append", type=int, default=[], metavar="N", help="1-based index from status")
+    p.add_argument("--drop", action="append", type=int, default=[], metavar="N")
+    p.set_defaults(func=cmd_step)
 
     p = contract_parser("attempt", "record that the current approach failed verification")
     p.add_argument("criterion")

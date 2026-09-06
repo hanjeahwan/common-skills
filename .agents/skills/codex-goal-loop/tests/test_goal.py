@@ -217,6 +217,23 @@ class GoalScriptTest(unittest.TestCase):
         self.run_ok("decision", "resolve", self.contract, "D2", "--approve")
         self.assertEqual(list(self.read()["working"]["acceptance"]), ["A1"])
 
+    def test_steps_gate_verify_and_derive_next(self) -> None:
+        self.run_ok("approach", self.contract, "A1", "--approach", "envoy filter")
+        self.run_ok("step", self.contract, "A1", "--add", "migrate /login", "--add", "run scripts/unmigrated.sh until empty")
+        self.assertIn("next step: migrate /login", self.run_ok("next", self.contract))
+        self.assertIn("undone step", self.run_fail("verify", self.contract, "A1", "--summary", "s", "--locator", "l", "--invalidated-by", "c"))
+        self.run_ok("step", self.contract, "A1", "--done", "1")
+        self.assertIn("already done", self.run_fail("step", self.contract, "A1", "--done", "1"))
+        self.assertIn("next step: run scripts/unmigrated.sh", self.run_ok("next", self.contract))
+        self.run_ok("step", self.contract, "A1", "--drop", "2")
+        self.assertNotIn("next step", self.run_ok("next", self.contract))
+        self.verify("A1")
+        steps = self.read()["working"]["acceptance"]["A1"]["steps"]
+        self.assertEqual([s["text"] for s in steps], ["migrate /login"])
+        self.assertIsNotNone(steps[0]["done_at"])
+        self.run_fail("step", self.contract, "A1")
+        self.run_fail("step", self.contract, "A1", "--done", "9")
+
     def test_non_ascii_title_gets_fallback_slug(self) -> None:
         out = self.run_ok("init", "--title", "认证迁移", "--objective", "o", "--accept", "a")
         contract = out.splitlines()[0].split("Contract: ", 1)[1]

@@ -154,3 +154,17 @@ Expected invariants:
 - On resume, Codex runs `invalidate A1` with the observed reason before `next`.
 - `next` returns A1 with its previous approach and failed attempts still visible.
 - Codex does not treat the stale evidence as current.
+
+## A12 — Steps survive a context reset
+
+Initial state:
+
+- A1 has the approach "migrate endpoints through the envoy filter" and three steps; the first is done and names `scripts/unmigrated.sh`.
+- The invocation starts with no memory of the previous session.
+
+Expected invariants:
+
+- Codex runs `next`, reads the first undone step, and runs the command it names before doing anything else on A1.
+- Codex marks a step done only after doing it, and drops a step only when the workspace shows it is already satisfied or no longer needed.
+- Codex does not call `verify A1` while a step is undone; the script rejects it if tried.
+- New steps name something re-observable, not "continue the migration".
