@@ -1,0 +1,339 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://codeartz.xyz/schemas/codex-goal-loop/goal.schema.json",
+  "title": "Codex Goal Loop contract",
+  "description": "One goal contract. `protected` is the semantic authority and changes only through an approved refinement decision. `working` stores facts only: current approach, failed attempts, evidence, risks, and decisions. Criterion state (open, blocked, exhausted, verified) is derived by scripts/goal.py and never stored. Native Codex Goal lifecycle is never stored here.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "title",
+    "created_at",
+    "protected",
+    "working"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "title": {
+      "$ref": "#/$defs/text"
+    },
+    "created_at": {
+      "$ref": "#/$defs/timestamp"
+    },
+    "protected": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "objective",
+        "acceptance",
+        "constraints",
+        "non_goals",
+        "max_attempts"
+      ],
+      "properties": {
+        "objective": {
+          "$ref": "#/$defs/text"
+        },
+        "acceptance": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "statement"
+            ],
+            "properties": {
+              "id": {
+                "$ref": "#/$defs/criterionId"
+              },
+              "statement": {
+                "$ref": "#/$defs/text"
+              }
+            }
+          }
+        },
+        "constraints": {
+          "$ref": "#/$defs/textList"
+        },
+        "non_goals": {
+          "$ref": "#/$defs/textList"
+        },
+        "max_attempts": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Failed approaches allowed per criterion before the loop must open a decision instead of trying again."
+        }
+      }
+    },
+    "working": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "acceptance",
+        "risks",
+        "decisions"
+      ],
+      "properties": {
+        "acceptance": {
+          "type": "object",
+          "description": "Keys must equal the set of protected.acceptance ids.",
+          "propertyNames": {
+            "$ref": "#/$defs/criterionId"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/criterionFacts"
+          }
+        },
+        "risks": {
+          "$ref": "#/$defs/textList"
+        },
+        "decisions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/decision"
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "text": {
+      "type": "string",
+      "minLength": 1
+    },
+    "textList": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/text"
+      }
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "criterionId": {
+      "type": "string",
+      "pattern": "^A[1-9][0-9]*$"
+    },
+    "decisionId": {
+      "type": "string",
+      "pattern": "^D[1-9][0-9]*$"
+    },
+    "criterionFacts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "approach",
+        "next_action",
+        "attempts",
+        "evidence"
+      ],
+      "properties": {
+        "approach": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/text"
+            }
+          ]
+        },
+        "next_action": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/text"
+            }
+          ]
+        },
+        "attempts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "approach",
+              "outcome",
+              "observed_at"
+            ],
+            "properties": {
+              "approach": {
+                "$ref": "#/$defs/text"
+              },
+              "outcome": {
+                "$ref": "#/$defs/text"
+              },
+              "observed_at": {
+                "$ref": "#/$defs/timestamp"
+              }
+            }
+          }
+        },
+        "evidence": {
+          "description": "null means unverified. Non-null means verified until an invalidated_by condition occurs.",
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "summary",
+                "locator",
+                "observed_at",
+                "invalidated_by"
+              ],
+              "properties": {
+                "summary": {
+                  "$ref": "#/$defs/text"
+                },
+                "locator": {
+                  "$ref": "#/$defs/text"
+                },
+                "observed_at": {
+                  "$ref": "#/$defs/timestamp"
+                },
+                "invalidated_by": {
+                  "type": "array",
+                  "minItems": 1,
+                  "items": {
+                    "$ref": "#/$defs/text"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "decision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "kind",
+        "request",
+        "blocks",
+        "opened_at",
+        "resolution"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/decisionId"
+        },
+        "kind": {
+          "enum": [
+            "refinement",
+            "input"
+          ],
+          "description": "refinement: a proposed change to protected, applied by the script on approval. input: anything else only the user can supply or authorize."
+        },
+        "request": {
+          "$ref": "#/$defs/text"
+        },
+        "blocks": {
+          "type": "array",
+          "description": "Criteria that cannot advance until this decision is resolved. A refinement's target criterion is blocked implicitly.",
+          "items": {
+            "$ref": "#/$defs/criterionId"
+          }
+        },
+        "opened_at": {
+          "$ref": "#/$defs/timestamp"
+        },
+        "refinement": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "target",
+            "operation"
+          ],
+          "properties": {
+            "target": {
+              "oneOf": [
+                {
+                  "enum": [
+                    "objective",
+                    "constraints",
+                    "non_goals",
+                    "max_attempts"
+                  ]
+                },
+                {
+                  "$ref": "#/$defs/criterionId"
+                }
+              ],
+              "description": "objective/max_attempts accept set; constraints/non_goals accept add or remove by exact text; a criterion id accepts set, add, or remove."
+            },
+            "operation": {
+              "enum": [
+                "set",
+                "add",
+                "remove"
+              ]
+            },
+            "proposed": {
+              "$ref": "#/$defs/text"
+            }
+          }
+        },
+        "resolution": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "outcome",
+                "at"
+              ],
+              "properties": {
+                "outcome": {
+                  "enum": [
+                    "approved",
+                    "rejected"
+                  ]
+                },
+                "at": {
+                  "$ref": "#/$defs/timestamp"
+                },
+                "note": {
+                  "$ref": "#/$defs/text"
+                }
+              }
+            }
+          ]
+        }
+      },
+      "if": {
+        "properties": {
+          "kind": {
+            "const": "refinement"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "refinement"
+        ]
+      },
+      "else": {
+        "not": {
+          "required": [
+            "refinement"
+          ]
+        }
+      }
+    }
+  }
+}

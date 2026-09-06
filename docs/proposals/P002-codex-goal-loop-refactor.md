@@ -363,7 +363,8 @@ No bulk migration or automatic rewrite is required.
 
 The refactor was implemented in the canonical
 [`codex-goal-loop` instructions](../../.agents/skills/codex-goal-loop/SKILL.md),
-the [goal contract template](../../.agents/skills/codex-goal-loop/references/goal-template.md),
+the goal contract template (`references/goal-template.md`, since replaced by
+[`schemas/goal.schema.json`](../../.agents/skills/codex-goal-loop/schemas/goal.schema.json)),
 the [behavior cases](../../.agents/skills/codex-goal-loop/tests/cases.md), and
 the [agent metadata](../../.agents/skills/codex-goal-loop/agents/openai.yaml).
 The native Codex Goal now owns lifecycle, budget, and usage. `Protected Goal`

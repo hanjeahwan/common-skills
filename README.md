@@ -6,7 +6,7 @@ Project-local Codex skills for durable goal execution and parallel coding with a
 
 ### Codex Goal Loop
 
-`$codex-goal-loop` pursues an explicitly requested bounded goal through evidence-driven Observe, Decide, Act, and Verify iterations.
+`$codex-goal-loop` pursues an explicitly requested bounded goal by driving every acceptance criterion of a schema-validated JSON contract to verified evidence. `scripts/goal.py` owns the contract state machine; the native Codex Goal owns lifecycle.
 
 - [Skill instructions](.agents/skills/codex-goal-loop/SKILL.md)
 - [Behavior cases](.agents/skills/codex-goal-loop/tests/cases.md)
