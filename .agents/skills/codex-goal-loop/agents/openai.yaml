@@ -1,6 +1,6 @@
 interface:
   display_name: "Codex Goal Loop"
-  short_description: "Drive schema-validated JSON goal contracts through Codex Goals"
-  default_prompt: "Use $codex-goal-loop to resume the active native Codex Goal, or help me define a bounded objective and acceptance criteria and propose a new Goal contract for approval."
+  short_description: "Drive a schema-validated JSON goal contract to verified evidence"
+  default_prompt: "Use $codex-goal-loop to set a goal: state my objective and its acceptance criteria, or continue the goal contract already in .goal/."
 policy:
   allow_implicit_invocation: false

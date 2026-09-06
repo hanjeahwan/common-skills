@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://codeartz.xyz/schemas/codex-goal-loop/goal.schema.json",
   "title": "Codex Goal Loop contract",
-  "description": "One goal contract. `protected` is the semantic authority and changes only through an approved refinement decision. `working` stores facts only: current approach, steps, failed attempts, evidence, risks, and decisions. Criterion state (open, blocked, exhausted, verified) is derived by scripts/goal.py and never stored. Native Codex Goal lifecycle is never stored here.",
+  "description": "One goal contract. `protected` is the semantic authority and changes only through an approved refinement decision. `working` stores facts only: current approach, steps, failed attempts, evidence, risks, and decisions. Criterion state (open, blocked, exhausted, verified) is derived by scripts/goal.py and never stored.",
   "type": "object",
   "additionalProperties": false,
   "required": [

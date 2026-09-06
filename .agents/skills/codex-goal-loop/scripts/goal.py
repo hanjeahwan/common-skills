@@ -19,8 +19,8 @@ Authority split (see SKILL.md):
 - `protected` is the semantic authority. Only `decision resolve --approve` on a
   refinement decision may change it.
 - `working` is a replaceable evidence checkpoint keyed by criterion id.
-- Native Codex Goal lifecycle is never stored here. `handoff` takes the
-  observed native status as an argument instead of persisting it.
+- `current` resolves the contract by scanning `.goal/`; the contract is the only
+  state this script reads or writes.
 
 Requires Python 3.10+ and the `jsonschema` package.
 
@@ -52,14 +52,7 @@ SCHEMA_PATH = Path(__file__).resolve().parent.parent / "schemas" / "goal.schema.
 CONTRACT_DIR = ".goal"
 DEFAULT_MAX_ATTEMPTS = 10
 GITIGNORE_ENTRIES = {"/.goal/", ".goal/", ".goal", "/.goal"}
-NATIVE_STATUSES = ("active", "paused", "blocked", "complete")
-EXECUTION_CLAUSE = (
-    "Pursue the referenced contract's protected objective, acceptance criteria, "
-    "constraints, and non-goals as the sole authority for what this Goal means. "
-    "Drive every acceptance criterion to verified with current observable "
-    "evidence through scripts/goal.py, then complete this Codex Goal. Do not "
-    "change the protected section without an approved refinement decision."
-)
+
 
 
 class GoalError(Exception):
@@ -118,39 +111,57 @@ def check_invariants(contract: dict) -> list[str]:
                 errors.append(f"{decision['id']} blocks unknown criterion {cid}")
         refinement = decision.get("refinement")
         if refinement:
-            errors.extend(_refinement_errors(decision["id"], refinement, protected))
+            errors.extend(_refinement_shape_errors(decision["id"], refinement))
     return errors
 
 
-def _refinement_errors(did: str, refinement: dict, protected: dict) -> list[str]:
-    ids = [a["id"] for a in protected["acceptance"]]
+def _refinement_shape_errors(did: str, refinement: dict) -> list[str]:
+    """Rules that stay true for the life of the decision, whatever `protected` becomes."""
     target, op = refinement["target"], refinement["operation"]
     proposed = refinement.get("proposed")
     errors: list[str] = []
-    if target in ("objective", "max_attempts"):
-        if op != "set":
-            errors.append(f"{did}: {target} supports only operation=set")
-        if target == "max_attempts" and not (proposed and proposed.isdigit() and int(proposed) >= 1):
-            errors.append(f"{did}: max_attempts requires a positive integer in proposed")
-    elif target in ("constraints", "non_goals"):
-        if op == "set":
-            errors.append(f"{did}: {target} supports only add or remove")
-        if not proposed:
-            errors.append(f"{did}: {target} {op} requires the exact text in proposed")
-        elif op == "add" and proposed in protected[target]:
-            errors.append(f"{did}: {target} already contains that text")
-        elif op == "remove" and proposed not in protected[target]:
-            errors.append(f"{did}: {target} does not contain that text")
-        return errors
-    elif op == "add" and target in ids:
-        errors.append(f"{did}: cannot add existing criterion {target}")
-    elif op in ("set", "remove") and target not in ids:
-        errors.append(f"{did}: {op} targets unknown criterion {target}")
+    if target in ("objective", "max_attempts") and op != "set":
+        errors.append(f"{did}: {target} supports only operation=set")
+    if target in ("constraints", "non_goals") and op == "set":
+        errors.append(f"{did}: {target} supports only add or remove")
+    if target == "max_attempts" and not (proposed and proposed.isdigit() and int(proposed) >= 1):
+        errors.append(f"{did}: max_attempts requires a positive integer in proposed")
     if op in ("set", "add") and not proposed:
         errors.append(f"{did}: operation {op} requires proposed text")
-    if op == "remove" and proposed:
+    if op == "remove" and target not in ("constraints", "non_goals") and proposed:
         errors.append(f"{did}: operation remove must not carry proposed text")
+    if target in ("constraints", "non_goals") and not proposed:
+        errors.append(f"{did}: {target} {op} requires the exact text in proposed")
     return errors
+
+
+def refinement_conflict(contract: dict, refinement: dict) -> str | None:
+    """Why this refinement cannot be applied to `protected` as it stands now.
+
+    Checked when the decision is opened and again when it is approved, because an
+    earlier approval can invalidate a later proposal. It is not a stored-contract
+    invariant: an open decision that has gone stale must stay writable so the user
+    can still reject it.
+    """
+    protected = contract["protected"]
+    ids = [a["id"] for a in protected["acceptance"]]
+    target, op = refinement["target"], refinement["operation"]
+    proposed = refinement.get("proposed")
+    if target in ("constraints", "non_goals"):
+        if op == "add" and proposed in protected[target]:
+            return f"{target} already contains that text"
+        if op == "remove" and proposed not in protected[target]:
+            return f"{target} does not contain that text"
+        return None
+    if target in ("objective", "max_attempts"):
+        return None
+    if op == "add" and target in ids:
+        return f"{target} already exists"
+    if op in ("set", "remove") and target not in ids:
+        return f"{target} does not exist"
+    if op == "remove" and len(ids) == 1:
+        return "a contract keeps at least one acceptance criterion"
+    return None
 
 
 def validate(contract: dict) -> list[str]:
@@ -348,7 +359,7 @@ def choose_next(contract: dict) -> dict:
 
 
 def readiness(contract: dict) -> list[str]:
-    """Reasons the contract does not yet permit native completion."""
+    """Reasons the contract is not finished."""
     reasons = [f"{cid} is {state_of(contract, cid)}" for cid in criterion_ids(contract) if not is_verified(contract, cid)]
     reasons.extend(f"{d['id']} ({d['kind']}) is unresolved" for d in open_decisions(contract))
     return reasons
@@ -363,6 +374,8 @@ def cmd_init(args: argparse.Namespace) -> int:
     stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
     if args.path:
         path = resolve_contract(root, args.path, must_exist=False)
+        if path.parent == (root / CONTRACT_DIR).resolve():
+            raise GoalError(f"--path is for tracked contracts; {CONTRACT_DIR}/ is ignored by git")
     else:
         path = resolve_contract(root, f"{CONTRACT_DIR}/{slugify(args.title)}-{stamp}.json", must_exist=False)
         ensure_gitignored(root, path)
@@ -387,8 +400,46 @@ def cmd_init(args: argparse.Namespace) -> int:
         },
     }
     save(path, contract)
-    print(f"Contract: {relative(root, path)}\n\n{EXECUTION_CLAUSE}")
+    locator = relative(root, path)
+    print(f"Contract: {locator}\n")
+    print("If a runtime goal is set for this work, use this objective verbatim:")
+    print(f"  Pursue the contract at {locator} with $codex-goal-loop until `ready` passes.")
     return 0
+
+
+def cmd_current(args: argparse.Namespace) -> int:
+    """Resolve the single unfinished contract under .goal/.
+
+    Unfinished means `ready` would fail. A finished contract stays on disk as a
+    record and is never returned here, so a new goal does not collide with it.
+    """
+    directory = args.root / CONTRACT_DIR
+    unfinished: list[str] = []
+    finished: list[str] = []
+    invalid: list[str] = []
+    for path in sorted(directory.glob("*.json")) if directory.is_dir() else []:
+        rel = relative(args.root, path)
+        try:
+            contract = load(path)
+        except GoalError as error:
+            sys.stderr.write(f"warning: ignoring {rel}: {error}\n")
+            invalid.append(rel)
+            continue
+        (unfinished if readiness(contract) else finished).append(rel)
+    legacy = sorted(relative(args.root, p) for p in directory.glob("*.md")) if directory.is_dir() else []
+    if len(unfinished) == 1:
+        print(unfinished[0])
+        return 0
+    if not unfinished:
+        tail = "".join(
+            f"; {label}: {', '.join(items)}"
+            for label, items in (("invalid", invalid), ("legacy", legacy), ("finished", finished))
+            if items
+        )
+        raise GoalError(f"no unfinished contract in {CONTRACT_DIR}/{tail}")
+    raise GoalError(
+        "more than one unfinished contract; name the one to use: " + ", ".join(unfinished)
+    )
 
 
 def cmd_validate(args: argparse.Namespace) -> int:
@@ -485,7 +536,7 @@ def print_status(contract: dict) -> None:
 def print_next(contract: dict) -> None:
     choice = choose_next(contract)
     if choice["kind"] == "ready":
-        print("Next: every criterion is verified and no decision is open; run `ready` before native completion")
+        print("Next: every criterion is verified and no decision is open; run `ready` to finish")
     elif choice["kind"] == "await":
         print(f"Next: awaiting user decision(s) {', '.join(choice['decisions'])}; no criterion can advance")
     elif choice["kind"] == "exhausted":
@@ -615,13 +666,13 @@ def cmd_step(args: argparse.Namespace) -> int:
     if not (args.add or args.done or args.drop):
         raise GoalError("nothing to change; pass --add, --done, or --drop")
     steps = facts["steps"]
-    for index in args.done:
+    for index in sorted(set(args.done)):
         if not 1 <= index <= len(steps):
             raise GoalError(f"{cid} step {index} does not exist")
         if steps[index - 1]["done_at"]:
             raise GoalError(f"{cid} step {index} is already done")
         steps[index - 1]["done_at"] = now()
-    for index in sorted(args.drop, reverse=True):
+    for index in sorted(set(args.drop), reverse=True):
         if not 1 <= index <= len(steps):
             raise GoalError(f"{cid} step {index} does not exist")
         steps.pop(index - 1)
@@ -638,7 +689,7 @@ def cmd_risk(args: argparse.Namespace) -> int:
     risks = contract["working"]["risks"]
     if not (args.add or args.drop):
         raise GoalError("nothing to change; pass --add or --drop")
-    for index in sorted(args.drop, reverse=True):
+    for index in sorted(set(args.drop), reverse=True):
         if not 1 <= index <= len(risks):
             raise GoalError(f"risk {index} does not exist")
         risks.pop(index - 1)
@@ -668,6 +719,9 @@ def cmd_decision_open(args: argparse.Namespace) -> int:
         refinement = {"target": args.target, "operation": args.operation}
         if args.proposed:
             refinement["proposed"] = args.proposed
+        conflict = refinement_conflict(contract, refinement)
+        if conflict:
+            raise GoalError(f"cannot propose that refinement: {conflict}")
         decision["refinement"] = refinement
     elif args.target or args.operation or args.proposed:
         raise GoalError("--target/--operation/--proposed apply only to kind=refinement")
@@ -717,13 +771,12 @@ def cmd_decision_resolve(args: argparse.Namespace) -> int:
         raise GoalError(f"{args.decision} is already resolved")
     outcome = "approved" if args.approve else "rejected"
     refinement = decision.get("refinement")
-    if outcome == "approved" and refinement and refinement["operation"] == "remove":
-        others = [
-            d["id"] for d in open_decisions(contract)
-            if d is not decision and d.get("refinement", {}).get("target") == refinement["target"]
-        ]
-        if others:
-            raise GoalError(f"resolve {', '.join(others)} before removing {refinement['target']}")
+    if outcome == "approved" and refinement:
+        conflict = refinement_conflict(contract, refinement)
+        if conflict:
+            raise GoalError(
+                f"{args.decision} no longer applies: {conflict}; reject it or propose a new refinement"
+            )
     decision["resolution"] = {"outcome": outcome, "at": now()}
     if args.note:
         decision["resolution"]["note"] = args.note
@@ -743,11 +796,11 @@ def cmd_ready(args: argparse.Namespace) -> int:
     contract = load(resolve_contract(args.root, args.contract))
     reasons = readiness(contract)
     if reasons:
-        print("NOT READY for native completion:")
+        print("NOT READY:")
         for reason in reasons:
             print(f"  - {reason}")
         return 1
-    print("READY for native completion once every falsifier below has been checked:")
+    print("READY once every falsifier below has been checked:")
     for cid in criterion_ids(contract):
         ev = facts_of(contract, cid)["evidence"]
         print(f"  {cid}: {ev['summary']} @ {ev['locator']} ({ev['observed_at']})")
@@ -768,7 +821,7 @@ def cmd_handoff(args: argparse.Namespace) -> int:
     pending = [f"{d['id']} ({d['kind']}): {d['request']}" for d in open_decisions(contract)]
     choice = choose_next(contract)
     if choice["kind"] == "ready":
-        next_line = "all criteria verified; native completion is the next step"
+        next_line = "all criteria verified; run `ready` to finish"
     elif choice["kind"] == "await":
         next_line = f"await decision(s) {', '.join(choice['decisions'])}"
     elif choice["kind"] == "exhausted":
@@ -777,7 +830,6 @@ def cmd_handoff(args: argparse.Namespace) -> int:
         next_line = f"pursue {choice['criterion']}"
         if choice["next_step"]:
             next_line += f": {choice['next_step']}"
-    print(f"Native Goal as last observed: {args.native}")
     print(f"Contract: {relative(args.root, path)}")
     print(f"Acceptance: verified [{', '.join(verified) or '-'}]; unverified [{', '.join(unverified) or '-'}]")
     print(f"Evidence: {'; '.join(evidence) or 'none yet'}")
@@ -795,7 +847,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--root", type=Path, default=Path.cwd(), help="workspace root (default: cwd)")
     sub = parser.add_subparsers(dest="command", required=True)
 
-    p = sub.add_parser("init", help="create a contract and print the native objective text")
+    p = sub.add_parser("init", help="create a contract and print its path")
     p.add_argument("--title", required=True)
     p.add_argument("--objective", required=True, help="L0 objective")
     p.add_argument("--accept", action="append", required=True, metavar="TEXT", help="L1 acceptance criterion; repeat, ids are assigned A1..An in order")
@@ -810,6 +862,8 @@ def build_parser() -> argparse.ArgumentParser:
         q = sub.add_parser(name, help=help_text)
         q.add_argument("contract", help="workspace-relative contract path")
         return q
+
+    sub.add_parser("current", help="print the single unfinished contract under .goal/").set_defaults(func=cmd_current)
 
     contract_parser("validate", "validate a contract against the schema and invariants").set_defaults(func=cmd_validate)
 
@@ -876,11 +930,9 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--note")
     p.set_defaults(func=cmd_decision_resolve)
 
-    contract_parser("ready", "exit 0 only when the contract permits native completion").set_defaults(func=cmd_ready)
+    contract_parser("ready", "exit 0 only when the contract is finished").set_defaults(func=cmd_ready)
 
-    p = contract_parser("handoff", "print the end-of-invocation handoff block")
-    p.add_argument("--native", choices=NATIVE_STATUSES, required=True, help="native Goal status as last observed")
-    p.set_defaults(func=cmd_handoff)
+    contract_parser("handoff", "print the end-of-invocation handoff block").set_defaults(func=cmd_handoff)
     return parser
 
 

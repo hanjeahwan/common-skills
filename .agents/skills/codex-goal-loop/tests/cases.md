@@ -10,64 +10,74 @@ Prompt:
 
 Expected invariants:
 
-- Codex checks native Goal state before creating a contract.
-- It creates the contract with `goal.py init`, never by writing JSON directly.
-- It creates one native Goal whose objective contains exactly the `Contract:` locator and execution clause printed by `init`.
-- Automatic Skill selection without an explicit goal request does not call `create_goal`.
+- Codex creates the contract with `goal.py init`, never by writing JSON directly.
+- Automatic Skill selection without an explicit goal request creates nothing.
 - Default mode leaves `.goal/` ignored by git.
 - Explicitly requested cross-machine mode uses an approved tracked path through `init --path` without automatically committing it.
-- If native Goal creation fails after the contract is written, the draft remains unlinked and the loop does not start.
 
-## A2 — Pointer without duplicated contract
+## A1b — Pointer objective for a runtime goal
+
+Prompt, after a contract exists:
+
+> Set a goal so this runs on its own until the contract passes.
+
+Expected invariants:
+
+- The objective names `$codex-goal-loop` and the contract path.
+- It does not restate the objective, acceptance criteria, or constraints.
+- Codex does not manage that goal's status afterwards, and the contract gains no field describing it.
+
+## A2 — Contract discovery
 
 Initial state:
 
-- A contract contains an objective, two criteria, constraints, and non-goals.
+- One unfinished contract exists under `.goal/`.
 
 Expected invariants:
 
-- The native objective contains the contract locator and execution clause.
-- It does not copy the objective, criteria, constraints, non-goals, or title.
+- Codex resolves it with `current`, not from memory or any other source.
+- With a second unfinished contract present, `current` fails and Codex asks which one to use instead of guessing.
+- With no unfinished contract, Codex reports that and starts a new one only on an explicit request.
+- A contract created with `--path` outside `.goal/` is named explicitly.
 
-## A3 — Resume and invalid locator
+## A3 — Unusable contract
 
 Variants:
 
-- Test separately with one valid locator, no locator, two locators, an absolute path, a missing file, a parent-directory escape, a contract that fails `validate`, and a legacy Markdown contract.
+- Test separately with a path outside the workspace, a missing file, a contract that fails `validate`, and a legacy Markdown contract.
 
 Expected invariants:
 
-- One valid workspace-contained locator resumes without another path parameter.
-- Every invalid case stops before the loop runs and reports the script's error verbatim.
-- No invalid case reconstructs or hand-edits the contract.
-- The legacy Markdown case proposes an `init` from its Protected Goal and waits for approval and `/goal edit`.
-- A paused or blocked native Goal does not run the loop.
+- Every case stops before the loop runs and reports the script's error verbatim.
+- No case reconstructs or hand-edits the contract.
+- The legacy Markdown case proposes an `init` from its Protected Goal and waits for approval.
 
 ## A4 — No parallel lifecycle status
 
 Prompt:
 
-> Continue the active goal and checkpoint the verified evidence.
+> Continue the goal and checkpoint the verified evidence.
 
 Expected invariants:
 
 - Evidence is recorded through `verify` with a summary, locator, and invalidation condition.
 - Risks are recorded through `risk`.
-- The contract never gains a stored criterion state or a native lifecycle field; `status` derives criterion state and `handoff` receives the observed native status as an argument.
+- The contract never gains a stored criterion state; `status` derives it.
 
-## A5 — Native lifecycle transitions
+## A5 — Lifecycle transitions
 
 Initial state:
 
 - Case one has an unverified criterion.
 - Case two has every criterion verified, no open decision, and all required validation passing.
-- Case three has an open `input` decision but does not yet satisfy the native blocked contract.
+- Case three has an open `input` decision.
 
 Expected invariants:
 
-- Case one does not call `update_goal({ status: "complete" })`; `ready` exits 1.
-- Case two runs `ready`, checks the listed falsifiers within authority, then completes only through the native Goal and reports the returned status and usage.
-- Case three remains active, keeps the open decision as the only blocker record, and keeps no local counter.
+- Case one keeps working; `ready` exits 1 and Codex does not claim completion.
+- Case two runs `ready`, checks the listed falsifiers within authority, then reports completion with its evidence.
+- Case three reports the decision verbatim and stops, keeping no turn counter and inventing no other blocker record.
+- No case makes progress conditional on anything outside the contract and the observable workspace.
 
 ## A6 — Approved contract refinement
 
@@ -81,7 +91,6 @@ Expected invariants:
 - `verify A2` is rejected while the decision is open.
 - After approval, `decision resolve --approve` changes only the targeted field and invalidates affected evidence.
 - After rejection, `protected` is unchanged and A2 becomes workable again.
-- The native objective remains unchanged because its locator is stable.
 
 ## A7 — Consistent authority model
 
@@ -98,36 +107,35 @@ Expected invariants:
 
 - `SKILL.md` is the sole normative owner of the authority model.
 - `references/workflow.md`, the schema, the script, and the repository README defer to `SKILL.md`.
-- The schema has no field for native lifecycle status.
+- The schema has no lifecycle field; every criterion state is derived.
 - `agents/openai.yaml` does not define a parallel authority model.
-- Metadata remains routable from user intent and does not assume the model already knows native Goal state.
-- No target instructs the host to preserve a separate goal-file handoff parameter.
+- Metadata remains routable from user intent and does not assume the model already knows any prior state.
 
-## A8 — Route an active Goal by intent
+## A8 — A second goal request
 
 Exercise each input independently:
 
-- The native objective contains one valid contract locator, and the invocation continues the same Goal.
-- The native objective contains one valid contract locator, and the invocation requests a different Goal.
-- The native objective contains no locator, and it matches the requested intent.
-- The native objective contains no locator, and it has a different intent.
+- An unfinished contract exists and the invocation continues that goal.
+- An unfinished contract exists and the invocation names a different goal.
+- No unfinished contract exists and the user explicitly asks to set one.
+- No unfinished contract exists and the Skill was selected automatically.
 
 Expected invariants:
 
-- Continuing the same Goal resumes the resolved contract.
-- Requesting a different Goal stops execution and asks the user how to handle the existing Goal.
-- A matching intent drafts the contract, obtains approval, runs `init`, and asks the user to install the locator with `/goal edit`.
-- A different intent stops execution and asks the user how to handle the existing Goal.
-- Exactly one routing branch applies to each input.
+- Continuing resumes the contract `current` returns.
+- A different goal stops and asks whether to finish, abandon, or run alongside the existing one.
+- An explicit request runs `init`.
+- Automatic selection creates nothing.
+- Exactly one branch applies to each input.
 
 ## A9 — Emit a Handoff
 
-Run any invocation while the Goal is active, paused, blocked, or complete.
+Run any invocation.
 
 Expected invariants:
 
-- Every invocation ends with the output of `handoff --native <observed status>`.
-- The report includes the observed native status, the contract locator, verified and unverified ids, evidence, pending decisions, and the next step.
+- Every invocation ends with the output of `handoff <contract>`.
+- The report includes the contract path, verified and unverified ids, evidence, pending decisions, and the next step.
 
 ## A10 — Failed approach changes the approach
 
@@ -139,7 +147,7 @@ Expected invariants:
 
 - Codex records the failure with `attempt` before doing anything else on A1.
 - Codex sets a different approach with `approach`; the script rejects the failed one.
-- `protected` is unchanged and the native Goal stays active.
+- `protected` is unchanged.
 - Codex does not open a decision merely because one approach failed.
 - After the tenth failed approach on A1, Codex does not try again; it opens a refinement or input decision and reports it.
 

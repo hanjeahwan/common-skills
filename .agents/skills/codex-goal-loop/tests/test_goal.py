@@ -30,6 +30,7 @@ class GoalScriptTest(unittest.TestCase):
             "--accept", "v1 proxies to v2", "--accept", "no failed logins",
         )
         self.contract = out.splitlines()[0].split("Contract: ", 1)[1]
+        self.init_output = out
 
     def run_cli(self, *args: str) -> tuple[int, str, str]:
         out, err = io.StringIO(), io.StringIO()
@@ -63,6 +64,8 @@ class GoalScriptTest(unittest.TestCase):
         self.assertEqual(goal.validate(self.read()), [])
         self.assertEqual(self.states(), {"A1": "open", "A2": "open"})
         self.assertIn("VALID", self.run_ok("validate", self.contract))
+        self.assertIn(f"Pursue the contract at {self.contract} with $codex-goal-loop until `ready` passes.", self.init_output)
+        self.assertNotIn("Move auth to v2", self.init_output.split("Contract:", 1)[1])
 
     def test_state_is_derived_not_stored(self) -> None:
         self.verify("A1")
@@ -152,11 +155,8 @@ class GoalScriptTest(unittest.TestCase):
         self.assertIn("D1 (input) is unresolved", self.run_fail("ready", self.contract, code=1))
         self.assertIn("awaiting user decision", self.run_ok("next", self.contract))
         self.run_ok("decision", "resolve", self.contract, "D1", "--approve")
-        self.assertIn("READY", self.run_ok("ready", self.contract))
-        handoff = self.run_ok("handoff", self.contract, "--native", "active")
-        self.assertIn("Native Goal as last observed: active", handoff)
-        self.assertIn("verified [A1, A2]", handoff)
-        self.assertNotIn("active", json.dumps(self.read()))
+        self.assertIn("READY once every falsifier", self.run_ok("ready", self.contract))
+        self.assertIn("verified [A1, A2]", self.run_ok("handoff", self.contract))
 
     def test_attempt_with_new_approach_passes_the_same_gates(self) -> None:
         self.run_ok("approach", self.contract, "A1", "--approach", "x")
@@ -209,13 +209,23 @@ class GoalScriptTest(unittest.TestCase):
         self.assertEqual(self.read()["protected"]["max_attempts"], 3)
         self.assertEqual(self.states(), {"A1": "open", "A2": "open"})
 
-    def test_remove_waits_for_other_open_refinements(self) -> None:
+    def test_a_stale_refinement_never_blocks_another_approval(self) -> None:
         self.run_ok("decision", "open", self.contract, "--kind", "refinement", "--request", "reword", "--target", "A2", "--operation", "set", "--proposed", "new text")
         self.run_ok("decision", "open", self.contract, "--kind", "refinement", "--request", "drop", "--target", "A2", "--operation", "remove")
-        self.assertIn("resolve D1 before removing A2", self.run_fail("decision", "resolve", self.contract, "D2", "--approve"))
-        self.run_ok("decision", "resolve", self.contract, "D1", "--reject")
         self.run_ok("decision", "resolve", self.contract, "D2", "--approve")
         self.assertEqual(list(self.read()["working"]["acceptance"]), ["A1"])
+        self.assertIn("D1 no longer applies: A2 does not exist", self.run_fail("decision", "resolve", self.contract, "D1", "--approve"))
+        self.run_ok("decision", "resolve", self.contract, "D1", "--reject")
+        self.assertIn("a contract keeps at least one", self.run_fail("decision", "open", self.contract, "--kind", "refinement", "--request", "drop last", "--target", "A1", "--operation", "remove"))
+
+    def test_duplicate_proposal_is_refused_at_open_not_at_write(self) -> None:
+        self.run_ok("decision", "open", self.contract, "--kind", "refinement", "--request", "c1", "--target", "constraints", "--operation", "add", "--proposed", "no schema changes")
+        self.run_ok("decision", "open", self.contract, "--kind", "refinement", "--request", "c2", "--target", "non_goals", "--operation", "add", "--proposed", "no schema changes")
+        self.run_ok("decision", "resolve", self.contract, "D1", "--approve")
+        self.assertEqual(self.read()["protected"]["constraints"], ["no schema changes"])
+        self.assertIn("already contains", self.run_fail("decision", "open", self.contract, "--kind", "refinement", "--request", "dup", "--target", "constraints", "--operation", "add", "--proposed", "no schema changes"))
+        self.run_ok("decision", "resolve", self.contract, "D2", "--approve")
+        self.assertEqual(self.read()["protected"]["non_goals"], ["no schema changes"])
 
     def test_steps_gate_verify_and_derive_next(self) -> None:
         self.run_ok("approach", self.contract, "A1", "--approach", "envoy filter")
@@ -240,6 +250,32 @@ class GoalScriptTest(unittest.TestCase):
         self.assertTrue(contract.startswith(".goal/goal-"))
         self.assertEqual(json.loads((self.root / contract).read_text())["title"], "认证迁移")
 
+    def test_current_resolves_only_unfinished_contracts(self) -> None:
+        self.assertEqual(self.run_ok("current").strip(), self.contract)
+        second = self.run_ok("init", "--title", "other", "--objective", "o", "--accept", "a").splitlines()[0].split("Contract: ", 1)[1]
+        self.assertIn("more than one unfinished contract", self.run_fail("current"))
+        self.run_ok("verify", second, "A1", "--summary", "s", "--locator", "l", "--invalidated-by", "c")
+        self.assertEqual(self.run_ok("current").strip(), self.contract)
+        self.verify("A1")
+        self.verify("A2")
+        out = self.run_fail("current")
+        self.assertIn("no unfinished contract", out)
+        self.assertIn(self.contract, out)
+
+    def test_current_ignores_unreadable_contracts(self) -> None:
+        (self.root / ".goal" / "broken.json").write_text("{not json", encoding="utf-8")
+        self.assertEqual(self.run_ok("current").strip(), self.contract)
+
+    def test_current_names_invalid_and_legacy_contracts(self) -> None:
+        (self.root / ".goal" / "legacy.md").write_text("# Goal: old\n", encoding="utf-8")
+        data = self.read(); data["bogus"] = 1
+        (self.root / self.contract).write_text(json.dumps(data), encoding="utf-8")
+        code, out, err = self.run_cli("current")
+        self.assertEqual(code, 2)
+        self.assertIn("Additional properties are not allowed", err)
+        self.assertIn("invalid: " + self.contract, err)
+        self.assertIn("legacy: .goal/legacy.md", err)
+
     def test_blocking_decision_skips_criterion_in_next(self) -> None:
         self.run_ok("decision", "open", self.contract, "--kind", "input", "--request", "need dataset", "--blocks", "A1")
         self.assertEqual(self.states()["A1"], "blocked")
@@ -247,7 +283,7 @@ class GoalScriptTest(unittest.TestCase):
 
     def test_risks_add_and_drop(self) -> None:
         self.run_ok("risk", self.contract, "--add", "prod access unknown", "--add", "schema drift")
-        self.run_ok("risk", self.contract, "--drop", "1")
+        self.run_ok("risk", self.contract, "--drop", "1", "--drop", "1")
         self.assertEqual(self.read()["working"]["risks"], ["schema drift"])
         self.run_fail("risk", self.contract, "--drop", "5")
         self.run_fail("risk", self.contract)
@@ -273,7 +309,9 @@ class GoalScriptTest(unittest.TestCase):
         self.assertIn("inside the workspace", self.run_fail("status", os.path.abspath(os.sep)))
         self.assertIn("inside the workspace", self.run_fail("status", ""))
         self.assertIn("not found", self.run_fail("status", ".goal/missing.json"))
-        self.assertIn("refusing to overwrite", self.run_fail("init", "--title", "t", "--objective", "o", "--accept", "a", "--path", self.contract))
+        self.assertIn("ignored by git", self.run_fail("init", "--title", "t", "--objective", "o", "--accept", "a", "--path", self.contract))
+        self.run_ok("init", "--title", "t", "--objective", "o", "--accept", "a", "--path", "docs/goal.json")
+        self.assertIn("refusing to overwrite", self.run_fail("init", "--title", "t", "--objective", "o", "--accept", "a", "--path", "docs/goal.json"))
 
 
 if __name__ == "__main__":
