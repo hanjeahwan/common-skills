@@ -46,6 +46,13 @@ Project-local Codex skills for durable goal execution and parallel coding with a
 - [Skill instructions](.agents/skills/docs-system/SKILL.md)
 - [Behavior cases](.agents/skills/docs-system/tests/cases.md)
 
+### Docs Ownership
+
+`$docs-ownership` decides which document owns a durable claim, keeps governed documentation reachable from the project entry, and keeps terminology and prose faithful to the maintained meaning. It defines no record-keeping format.
+
+- [Skill instructions](.agents/skills/docs-ownership/SKILL.md)
+- [Behavior cases](.agents/skills/docs-ownership/tests/cases.md)
+
 ## Design Proposals
 
 - [Proposal index](docs/proposals/README.md)

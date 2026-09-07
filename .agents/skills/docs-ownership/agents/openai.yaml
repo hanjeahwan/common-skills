@@ -1,0 +1,4 @@
+interface:
+  display_name: "Documentation Ownership"
+  short_description: "Decide the owner of a durable claim, keep docs reachable and prose faithful"
+  default_prompt: "Use $docs-ownership to place this documentation claim with its canonical owner, keep it reachable from the project entry, and apply the prose and terminology rules, then validate the link graph."
