@@ -1,0 +1,6 @@
+interface:
+  display_name: "Define Goal"
+  short_description: "Define and advance one standalone Goal document by evidence"
+  default_prompt: "Use $define-goal to turn my objective into a standalone Goal document and advance it with evidence until the goal result holds."
+policy:
+  allow_implicit_invocation: false

@@ -11,6 +11,13 @@ Project-local Codex skills for durable goal execution and parallel coding with a
 - [Skill instructions](.agents/skills/codex-goal-loop/SKILL.md)
 - [Behavior cases](.agents/skills/codex-goal-loop/tests/cases.md)
 
+### Define Goal
+
+`$define-goal` turns a stated objective into one standalone Goal document at `docs/goals/YYYYMMDD-<title>.md`, then advances that single document by evidence until the goal result holds.
+
+- [Skill instructions](.agents/skills/define-goal/SKILL.md)
+- [Behavior cases](.agents/skills/define-goal/tests/cases.md)
+
 ### Codex–Luna Swarm
 
 `$codex-luna-swarm` delegates independent investigation or implementation units to GPT-5.6 Luna workers at max reasoning effort. GPT-5.6 Sol remains the sole coordinator, resolves conflicts, personally reviews integrated code, and owns final delivery.
