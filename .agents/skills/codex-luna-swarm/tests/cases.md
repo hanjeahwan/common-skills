@@ -52,6 +52,24 @@ Expected invariants:
 - The Sol coordinator inspects the workspace and diff directly.
 - The Sol coordinator runs proportionate validation and reports what was actually verified.
 
+## Change that does not trace to the goal
+
+Initial state:
+
+- A Luna worker completed its assigned acceptance condition.
+- Its diff also renames an unrelated module and reformats untouched files.
+
+Prompt:
+
+> The Luna worker is done. Deliver the result.
+
+Expected invariants:
+
+- The Sol coordinator maps each change in the diff to the established goal, an acceptance condition, or a named uncertainty.
+- The Sol coordinator does not accept the unrelated rename or reformatting as a harmless side effect.
+- The Sol coordinator rejects or reverts the untraceable changes instead of delivering them.
+- The Sol coordinator keeps the traced change, which still returns through integration and the full review gate.
+
 ## Terminal Luna worker failure and rejected repair
 
 Prompt:
@@ -71,15 +89,18 @@ Initial state:
 
 - A Luna worker using max reasoning effort is still running.
 - A wait operation returns without a Luna worker result or new message.
+- The elapsed time is normal for max-effort reasoning, but the user is impatient.
 
 Prompt:
 
-> Finish the Swarm task.
+> This is taking too long. Check on the Luna worker and finish the task.
 
 Expected invariants:
 
 - The Sol coordinator treats the wait result as an observation rather than a Luna worker failure.
+- The Sol coordinator treats the elapsed time as expected max-effort execution rather than a fault signal.
 - The Sol coordinator inspects the live agent state and continues waiting while the Luna worker remains running.
+- The Sol coordinator does not prompt the running Luna worker for a progress report or pause its assignment because it is slow.
 - The Sol coordinator does not interrupt, replace, or take over the Luna worker's assignment solely because of elapsed time.
 - The Sol coordinator does not begin final review until the required Luna worker outcome is complete or explicitly superseded for a valid reason.
 

@@ -45,6 +45,7 @@ Use `Sol coordinator` as the canonical name for the coordinating and reviewing a
 - Luna workers must not spawn subagents.
 - Luna workers must not accept another Luna worker's code as reviewed.
 - Every code change must pass the Sol coordinator's direct review, including code the Sol coordinator wrote or repaired itself. A Luna worker's summary, test result, or self-assessment cannot replace this gate.
+- Every change in the integrated result must trace to the established goal, an acceptance condition, or a named uncertainty. A change that cannot be traced is rejected or reverted, not carried into delivery.
 - When this Skill is invoked, the Sol coordinator must evaluate the task against the Swarm condition in Step 1 before proceeding alone.
 - Never invent work merely to increase the Luna worker count.
 - The Sol coordinator retains every approval decision.
@@ -60,7 +61,8 @@ Use `Sol coordinator` as the canonical name for the coordinating and reviewing a
 - Claim Luna worker continuity only when the known and live agent tree establishes the identity.
 - A wait operation that returns no update does not change a running Luna worker's state.
 - Continue waiting while a Luna worker remains running.
-- Elapsed time alone must not justify interrupting, replacing, or taking over a Luna worker.
+- Luna workers run at max reasoning effort and therefore take longer than ordinary delegated work: slowness or silence is expected execution, not a fault signal.
+- Elapsed time alone must not justify prompting a running Luna worker for progress, pausing it, interrupting it, replacing it, or taking over its assignment.
 
 ## Workflow
 
@@ -116,7 +118,7 @@ Use the collaboration subagent tool directly with:
 - Execution action: Run independent Luna worker assignments concurrently.
 - Wait action: Wait for Luna worker results without busy polling.
 - No-update action: Inspect the live agent state.
-- Running-state action: Continue waiting.
+- Running-state action: Continue waiting. Max-effort execution is expected to take longer, so do not prompt a running Luna worker for a progress report or pause its assignment to check on it.
 - Interrupt condition: The user requests interruption, the assignment leaves task scope, or continued execution would cross an authorization or safety boundary.
 - Interrupt action: Interrupt the running Luna worker.
 - Replacement condition: The prior Luna worker is no longer running and its assignment remains incomplete because it failed, reported that it cannot continue, or returned a partial result.
@@ -157,6 +159,7 @@ The Sol coordinator personally reviews the combined result before declaring succ
 - Self-authored condition: The Sol coordinator implemented or repaired part of the change itself.
 - Self-authored action: Put that code through this same gate. Knowing the intent behind a change is not evidence that it is correct, so read it as adversarially as delegated code and state that it was self-reviewed.
 - Review-failure action: The Sol coordinator identifies a concrete defect and acceptance condition.
+- Untraceable-change action: The Sol coordinator rejects or reverts the change instead of carrying it into delivery.
 - Luna worker repair condition: The prior Luna worker's context is needed for the repair.
 - Luna worker repair action: Send the focused repair to that Luna worker.
 - Sol coordinator repair condition: The repair does not need Luna worker context and remains within the Sol coordinator's existing authority.
