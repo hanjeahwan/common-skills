@@ -21,13 +21,16 @@ Expected invariants:
 Initial state:
 
 - The lead's model differs from the coordinator configuration.
-- The lead reads `codex-luna-swarm` as a dependency.
+- The lead reads `codex-luna-swarm` as a dependency. That Skill defines an Astra coordinator and native Luna workflow, but no Lead reporting or Orca-specific behavior.
 
 Expected invariants:
 
 - Reading the dependency does not invoke it on the lead or change the lead's model.
 - The lead does not spawn another lead or route its final review to a coordinator.
 - A coordinator does not invoke `orca-swarm-lead` or start a recursive coordinator hierarchy.
+- The lead puts the bounded subgoal, reporting route, report events, and responsibility boundaries in each team Task instead of expecting the dependency to supply them.
+- Completion of that assigned Swarm task is submitted through the lead's reporting contract; the lead separately accepts the shared goal.
+- The dependency is not modified to add a lead mode, runtime gates, reporting rules, or completion overrides, and its standalone workflow remains unchanged.
 
 ## Native subagents are prohibited by the dispatch policy
 
@@ -50,6 +53,7 @@ Initial state:
 Expected invariants:
 
 - Startup reports the actual dependency problem before implementation.
+- Absence of Lead-specific rules is not an incompatibility; the lead supplies those rules in the team assignment.
 - The lead does not replace the dependency with `orca-luna-swarm` or duplicate its instructions locally.
 - The lead does not accept a coordinator self-description as proof that the correct Skill was loaded.
 

@@ -35,10 +35,12 @@ flowchart TD
 | Actor | Configuration | Responsibility |
 |---|---|---|
 | Lead | Invoking agent's current model and reasoning settings, unchanged | Understand the shared goal; allocate ownership; supervise teams; settle cross-team decisions; personally review changes; accept the overall result |
-| Coordinator | `gpt-6-astra`, `medium` reasoning effort | One supervised Orca terminal per team; run `codex-luna-swarm`; personally review team changes; report to the lead |
+| Astra coordinator | `gpt-6-astra`, `medium` reasoning effort | One supervised Orca terminal per team; run `codex-luna-swarm`; personally review team changes; report to the lead |
 | Luna worker | Native subagent configuration owned by `codex-luna-swarm`: `gpt-5.6-luna`, `max` effort | Perform one bounded assignment and report to its coordinator |
 
-The reporting chain is worker -> coordinator -> lead -> user. A coordinator can submit its assigned subgoal for acceptance, not declare the user's entire goal complete. Both the coordinator's review and the lead's own review are mandatory; neither substitutes for the other.
+This Skill owns team allocation, Orca orchestration, reporting requirements, cross-team responsibility, and whole-goal acceptance. The lead supplies those requirements in each team Task; `codex-luna-swarm` owns only the existing workflow inside one Swarm and does not need to know about a lead or Orca. Do not add a lead mode, reporting rules, runtime gates, or completion overrides to that dependency.
+
+The reporting chain is worker -> Astra coordinator -> lead -> user. A coordinator can submit its assigned subgoal for acceptance, not declare the user's entire goal complete. Both the coordinator's review and the lead's own review are mandatory; neither substitutes for the other.
 
 This Skill applies to the lead session only. Coordinators invoke `codex-luna-swarm`, not this Skill, and do not create other coordinators. Luna workers remain leaf agents. The lead routes instructions through the owning coordinator instead of becoming a second dispatcher for that team's workers.
 
@@ -50,7 +52,7 @@ Orca owns terminal placement, Run, Task, Dispatch, messaging, and supervised cle
 - Use the live guide for every Orca command and flag. Confirm the runtime is reachable and the lead can supervise coordinator terminals before assigning implementation.
 - Verify that the installed Orca dispatch policy and Codex configuration permit a supervised coordinator to use native collaboration subagents. Do not assume an Orca child Dispatch may delegate merely because Codex exposes a spawn tool.
 - If the guide, injected lifecycle instructions, or runtime prohibit that combination, report the incompatible boundary and stop the affected launch. Do not bypass it with a new Run, detached terminal, stripped preamble, alternate spawn tool, or a handoff that discards supervision.
-- Inspect the resolved `codex-luna-swarm` in each coordinator's execution context and confirm it supports the coordinator configuration and lead-managed scope in this Skill. A named Skill or startup claim alone does not establish compatible contents. A missing or incompatible dependency blocks the team; do not silently substitute `orca-luna-swarm` or copy a competing worker workflow here.
+- Inspect the resolved `codex-luna-swarm` in each coordinator's execution context and confirm its Astra coordinator and Luna worker configuration matches this Skill. Lead awareness is not a dependency requirement: supply team scope and reporting through the Task packet. A named Skill or startup claim alone does not establish compatible contents. A missing or incompatible dependency blocks the team; do not silently substitute `orca-luna-swarm` or copy a competing worker workflow here.
 - Verify each coordinator's effective model and effort from runtime session metadata or its effective launch receipt, including reused terminals. A requested configuration or agent self-description is not verification. A mismatch or unknown configuration blocks implementation; account for the attempted launch's resources before any documented corrective launch.
 - Coordinators are Orca-supervised Dispatches. Native Luna workers are not Orca Dispatches and must not be described as such. Native workers must not use their coordinator's Orca lifecycle authority or send `worker_done` on its behalf.
 
@@ -66,7 +68,7 @@ Split by subgoal and acceptance evidence, not merely by directory or desired age
 
 ### 2. Assign Teams And Dependencies
 
-Create team Task specs using `references/team-contract.md`. Each coordinator receives a self-contained assignment because its terminal need not inherit the lead's conversation.
+Create team Task specs using `references/team-contract.md`. Each coordinator receives a self-contained assignment because its terminal need not inherit the lead's conversation. State that the assigned subgoal is the complete task for that Swarm, provide the reporting route and required report events, and reserve shared-goal acceptance for the lead. This defines the task passed to `codex-luna-swarm`; it does not change that Skill's own completion or review rules.
 
 - The lead assigns one team as write owner of each shared file or component. The coordinator may subdivide only within that ownership; team-local disjointness does not prove global disjointness.
 - For a shared file, designate one owner and make other teams read-only there, or schedule writes sequentially. Worktrees do not remove semantic ownership conflicts.

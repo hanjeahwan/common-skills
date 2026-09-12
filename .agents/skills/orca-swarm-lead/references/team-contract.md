@@ -22,9 +22,9 @@ report_to: lead's actual runtime-provided communication route
 report_contract: startup; decision-relevant progress; immediate blockers; reviewed submission with evidence
 ```
 
-Include the following composition instructions in every team assignment:
+The lead must put the following composition instructions in every team assignment. They belong to this orchestration contract, not to `codex-luna-swarm`; loading that Skill alone does not provide team reporting or Orca lifecycle instructions:
 
-- Act as the coordinator of this team only. Use the resolved `codex-luna-swarm` for worker execution and personally review all team changes.
+- Act as the Astra coordinator of this team only. The assigned subgoal, scope, and acceptance conditions define the complete task for your Swarm; the shared goal is context, not authorization to own other teams. Use the resolved `codex-luna-swarm` for worker execution and personally review all team changes.
 - Establish effective session configuration and permitted native collaboration before implementation. Report dependency or policy incompatibility rather than improvising another topology.
 - Send startup readiness and report relevant progress, blockers, ownership conflicts, and the reviewed result to the lead. All teams report, including read-only teams and failed attempts.
 - Do not change shared interfaces, team ownership, or the overall goal without a lead decision. Ask through the live preamble's blocking-question mechanism; continue only genuinely independent authorized work.
@@ -33,7 +33,7 @@ Include the following composition instructions in every team assignment:
 - Settle native worker assignments and personally review the team result before sending your own Dispatch's completion. Use the exact lifecycle arguments, explicit outcome, summary format, and idle rules required by the live preamble.
 - Treat team success as a submission for lead acceptance, not completion of the shared user goal. A repair is subject to both review gates again.
 
-Do not copy all of `codex-luna-swarm` into this packet. Its implementation and review rules remain authoritative for the team's internal work.
+Do not copy or modify `codex-luna-swarm` to make it lead-aware. Its implementation, review, and completion rules remain authoritative for the assigned Swarm task. The lead owns the additional reporting and shared-goal acceptance requirements through this packet.
 
 ## Reports To The Lead
 
