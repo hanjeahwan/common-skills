@@ -1,4 +1,4 @@
 interface:
   display_name: "Orca Swarm Lead"
-  short_description: "Lead multiple Astra-coordinated Luna swarms"
-  default_prompt: "Use $orca-swarm-lead for this shared goal. Remain the lead on your current model and settings. Supervise gpt-6-astra coordinators at medium effort in separate Orca terminals, require each to use codex-luna-swarm and report its reviewed results, and personally review the actual changes and integrated result before accepting the goal."
+  short_description: "Lead multiple coordinator-led Luna swarms"
+  default_prompt: "Use $orca-swarm-lead for this shared goal. Remain the lead on your current model and settings. Supervise coordinators in separate Orca terminals using this Skill's team launch settings, require each to use codex-luna-swarm and report its reviewed results, and personally review the actual changes and integrated result before accepting the goal."

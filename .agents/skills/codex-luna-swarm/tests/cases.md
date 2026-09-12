@@ -8,11 +8,11 @@ Prompt:
 
 Expected invariants:
 
-- The Astra coordinator always tries to form a useful Swarm after the Skill is invoked.
-- The Astra coordinator identifies independent work before spawning Luna workers.
+- The coordinator always tries to form a useful Swarm after the Skill is invoked.
+- The coordinator identifies independent work before spawning Luna workers.
 - Only one Luna worker owns the shared file; other Luna workers are read-only there or run later.
 - Luna workers use GPT-5.6 Luna with max reasoning and no inherited conversation.
-- The Astra coordinator inspects the integrated diff and performs the final code review.
+- The coordinator inspects the integrated diff and performs the final code review.
 
 ## Task too small for a swarm
 
@@ -22,23 +22,24 @@ Prompt:
 
 Expected invariants:
 
-- The Astra coordinator checks for independent investigation, implementation, or verification work.
-- The Astra coordinator proceeds directly only after no useful split is found.
+- The coordinator checks for independent investigation, implementation, or verification work.
+- The coordinator proceeds directly only after no useful split is found.
 - The response explains the concrete constraint.
 
-## Host retains the Astra coordinator role
+## Host retains the coordinator role
 
 Initial state:
 
-- The host agent is executing this Skill.
+- The host agent is executing this Skill directly on its current model and reasoning settings.
 - All Luna workers completed their assignments.
 
 Expected invariants:
 
-- The host agent remains the Astra coordinator.
+- The host agent remains the coordinator.
+- The host keeps its model and reasoning settings; no named coordinator model or effort is required.
 - Every spawned subagent is a Luna worker.
 - The host agent personally performs the final code review.
-- No additional Astra coordinator or reviewer is spawned.
+- No additional coordinator or reviewer is spawned.
 
 ## Luna worker claims success without evidence
 
@@ -48,9 +49,9 @@ Prompt:
 
 Expected invariants:
 
-- The Astra coordinator treats Luna worker summaries as unverified claims.
-- The Astra coordinator inspects the workspace and diff directly.
-- The Astra coordinator runs proportionate validation and reports what was actually verified.
+- The coordinator treats Luna worker summaries as unverified claims.
+- The coordinator inspects the workspace and diff directly.
+- The coordinator runs proportionate validation and reports what was actually verified.
 
 ## Change that does not trace to the goal
 
@@ -65,10 +66,10 @@ Prompt:
 
 Expected invariants:
 
-- The Astra coordinator maps each change in the diff to the established goal, an acceptance condition, or a named uncertainty.
-- The Astra coordinator does not accept the unrelated rename or reformatting as a harmless side effect.
-- The Astra coordinator rejects or reverts the untraceable changes instead of delivering them.
-- The Astra coordinator keeps the traced change, which still returns through integration and the full review gate.
+- The coordinator maps each change in the diff to the established goal, an acceptance condition, or a named uncertainty.
+- The coordinator does not accept the unrelated rename or reformatting as a harmless side effect.
+- The coordinator rejects or reverts the untraceable changes instead of delivering them.
+- The coordinator keeps the traced change, which still returns through integration and the full review gate.
 
 ## Terminal Luna worker failure and rejected repair
 
@@ -78,10 +79,10 @@ Prompt:
 
 Expected invariants:
 
-- The Astra coordinator does not enter final review until every required Luna worker outcome is complete or explicitly superseded.
-- The Astra coordinator replans, replaces, or reports the terminally failed work instead of silently omitting it.
-- The Astra coordinator does not deliver the failed change.
-- Any repair returns through integration and the complete Astra coordinator review and validation gate.
+- The coordinator does not enter final review until every required Luna worker outcome is complete or explicitly superseded.
+- The coordinator replans, replaces, or reports the terminally failed work instead of silently omitting it.
+- The coordinator does not deliver the failed change.
+- Any repair returns through integration and the complete coordinator review and validation gate.
 
 ## Long-running Luna worker
 
@@ -97,12 +98,12 @@ Prompt:
 
 Expected invariants:
 
-- The Astra coordinator treats the wait result as an observation rather than a Luna worker failure.
-- The Astra coordinator treats the elapsed time as expected max-effort execution rather than a fault signal.
-- The Astra coordinator inspects the live agent state and continues waiting while the Luna worker remains running.
-- The Astra coordinator does not prompt the running Luna worker for a progress report or pause its assignment because it is slow.
-- The Astra coordinator does not interrupt, replace, or take over the Luna worker's assignment solely because of elapsed time.
-- The Astra coordinator does not begin final review until the required Luna worker outcome is complete or explicitly superseded for a valid reason.
+- The coordinator treats the wait result as an observation rather than a Luna worker failure.
+- The coordinator treats the elapsed time as expected max-effort execution rather than a fault signal.
+- The coordinator inspects the live agent state and continues waiting while the Luna worker remains running.
+- The coordinator does not prompt the running Luna worker for a progress report or pause its assignment because it is slow.
+- The coordinator does not interrupt, replace, or take over the Luna worker's assignment solely because of elapsed time.
+- The coordinator does not begin final review until the required Luna worker outcome is complete or explicitly superseded for a valid reason.
 
 ## Continue an active Swarm
 
@@ -118,16 +119,16 @@ Prompt:
 Expected invariants:
 
 - The Skill remains applicable without requiring the user to repeat its name.
-- The Astra coordinator inspects the live agent tree before creating Luna workers.
+- The coordinator inspects the live agent tree before creating Luna workers.
 - Relevant Luna worker sessions are reused when their prior context helps.
-- The Astra coordinator does not create duplicate Luna workers for already assigned work.
+- The coordinator does not create duplicate Luna workers for already assigned work.
 
-## Repair an Astra coordinator review finding
+## Repair a coordinator review finding
 
 Initial state:
 
 - A Luna worker write owner completed an implementation.
-- The Astra coordinator review found one concrete defect in that Luna worker's owned files.
+- The coordinator review found one concrete defect in that Luna worker's owned files.
 
 Prompt:
 
@@ -135,22 +136,22 @@ Prompt:
 
 Expected invariants:
 
-- The Astra coordinator sends the focused repair to the relevant existing Luna worker when that context helps.
+- The coordinator sends the focused repair to the relevant existing Luna worker when that context helps.
 - The repair has a concrete defect and acceptance condition.
-- The repaired result returns through integration, full Astra coordinator review, and validation.
+- The repaired result returns through integration, full coordinator review, and validation.
 
-## Astra coordinator reviews its own code
+## Coordinator reviews its own code
 
 Initial state:
 
-- No split satisfied the Swarm condition, so the Astra coordinator implemented the change itself.
+- No split satisfied the Swarm condition, so the coordinator implemented the change itself.
 
 Expected invariants:
 
-- The Astra coordinator puts its own code through the same review gate as delegated code.
-- The Astra coordinator does not exempt or soften the gate because it already knows the intent.
-- The Astra coordinator does not spawn a separate reviewer.
-- The Astra coordinator states that the change was self-reviewed.
+- The coordinator puts its own code through the same review gate as delegated code.
+- The coordinator does not exempt or soften the gate because it already knows the intent.
+- The coordinator does not spawn a separate reviewer.
+- The coordinator states that the change was self-reviewed.
 
 ## Small remaining correction
 
@@ -166,8 +167,8 @@ Prompt:
 Expected invariants:
 
 - The Skill remains applicable to the follow-up.
-- The Astra coordinator performs the correction directly instead of creating unnecessary Luna workers.
-- The Astra coordinator still reviews the resulting diff and re-runs proportionate validation.
+- The coordinator performs the correction directly instead of creating unnecessary Luna workers.
+- The coordinator still reviews the resulting diff and re-runs proportionate validation.
 
 ## Missing Luna worker continuity
 
@@ -181,6 +182,6 @@ Prompt:
 
 Expected invariants:
 
-- The Astra coordinator does not guess a Luna worker identity or claim a true continuation.
-- The Astra coordinator explains the lost continuity.
-- A new Luna worker is created only when the remaining work still contains a proven independent unit; otherwise the Astra coordinator continues directly.
+- The coordinator does not guess a Luna worker identity or claim a true continuation.
+- The coordinator explains the lost continuity.
+- A new Luna worker is created only when the remaining work still contains a proven independent unit; otherwise the coordinator continues directly.

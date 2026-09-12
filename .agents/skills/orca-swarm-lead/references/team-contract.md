@@ -24,7 +24,7 @@ report_contract: startup; decision-relevant progress; immediate blockers; review
 
 The lead must put the following composition instructions in every team assignment. They belong to this orchestration contract, not to `codex-luna-swarm`; loading that Skill alone does not provide team reporting or Orca lifecycle instructions:
 
-- Act as the Astra coordinator of this team only. The assigned subgoal, scope, and acceptance conditions define the complete task for your Swarm; the shared goal is context, not authorization to own other teams. Use the resolved `codex-luna-swarm` for worker execution and personally review all team changes.
+- Act as the coordinator of this team only. The assigned subgoal, scope, and acceptance conditions define the complete task for your Swarm; the shared goal is context, not authorization to own other teams. Use the resolved `codex-luna-swarm` for worker execution and personally review all team changes.
 - Establish effective session configuration and permitted native collaboration before implementation. Report dependency or policy incompatibility rather than improvising another topology.
 - Send startup readiness and report relevant progress, blockers, ownership conflicts, and the reviewed result to the lead. All teams report, including read-only teams and failed attempts.
 - Do not change shared interfaces, team ownership, or the overall goal without a lead decision. Ask through the live preamble's blocking-question mechanism; continue only genuinely independent authorized work.

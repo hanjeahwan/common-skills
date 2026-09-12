@@ -1,6 +1,6 @@
 ---
 name: orca-swarm-lead
-description: Lead multiple coding teams toward one shared goal in Orca. The invoking agent remains lead on its current model and settings, supervises GPT-6 Astra coordinators at medium reasoning effort in separate Orca terminals, and personally reviews their changes and the integrated result. Each coordinator uses codex-luna-swarm for native GPT-5.6 Luna workers at max effort and reports to the lead. Use when the user asks for a lead coordinating multiple swarms, multiple coordinator-and-worker teams in Orca, or continued management, repair, review, and delivery of that shared goal.
+description: Lead multiple coding teams toward one shared goal in Orca. The invoking agent remains lead on its current model and settings, supervises coordinators in separate Orca terminals, and personally reviews their changes and the integrated result. Each coordinator uses codex-luna-swarm for native GPT-5.6 Luna workers at max effort and reports to the lead. Use when the user asks for a lead coordinating multiple swarms, multiple coordinator-and-worker teams in Orca, or continued management, repair, review, and delivery of that shared goal.
 ---
 
 # Orca Swarm Lead
@@ -35,12 +35,14 @@ flowchart TD
 | Actor | Configuration | Responsibility |
 |---|---|---|
 | Lead | Invoking agent's current model and reasoning settings, unchanged | Understand the shared goal; allocate ownership; supervise teams; settle cross-team decisions; personally review changes; accept the overall result |
-| Astra coordinator | `gpt-6-astra`, `medium` reasoning effort | One supervised Orca terminal per team; run `codex-luna-swarm`; personally review team changes; report to the lead |
+| Coordinator | `gpt-5.6-sol`, `high` reasoning effort | One supervised Orca terminal per team; run `codex-luna-swarm`; personally review team changes; report to the lead |
 | Luna worker | Native subagent configuration owned by `codex-luna-swarm`: `gpt-5.6-luna`, `max` effort | Perform one bounded assignment and report to its coordinator |
+
+Coordinator is a role, not a model name. The configuration above applies only when the lead launches team terminals; `codex-luna-swarm` keeps whichever model and reasoning settings its host session already uses.
 
 This Skill owns team allocation, Orca orchestration, reporting requirements, cross-team responsibility, and whole-goal acceptance. The lead supplies those requirements in each team Task; `codex-luna-swarm` owns only the existing workflow inside one Swarm and does not need to know about a lead or Orca. Do not add a lead mode, reporting rules, runtime gates, or completion overrides to that dependency.
 
-The reporting chain is worker -> Astra coordinator -> lead -> user. A coordinator can submit its assigned subgoal for acceptance, not declare the user's entire goal complete. Both the coordinator's review and the lead's own review are mandatory; neither substitutes for the other.
+The reporting chain is worker -> coordinator -> lead -> user. A coordinator can submit its assigned subgoal for acceptance, not declare the user's entire goal complete. Both the coordinator's review and the lead's own review are mandatory; neither substitutes for the other.
 
 This Skill applies to the lead session only. Coordinators invoke `codex-luna-swarm`, not this Skill, and do not create other coordinators. Luna workers remain leaf agents. The lead routes instructions through the owning coordinator instead of becoming a second dispatcher for that team's workers.
 
@@ -52,7 +54,7 @@ Orca owns terminal placement, Run, Task, Dispatch, messaging, and supervised cle
 - Use the live guide for every Orca command and flag. Confirm the runtime is reachable and the lead can supervise coordinator terminals before assigning implementation.
 - Verify that the installed Orca dispatch policy and Codex configuration permit a supervised coordinator to use native collaboration subagents. Do not assume an Orca child Dispatch may delegate merely because Codex exposes a spawn tool.
 - If the guide, injected lifecycle instructions, or runtime prohibit that combination, report the incompatible boundary and stop the affected launch. Do not bypass it with a new Run, detached terminal, stripped preamble, alternate spawn tool, or a handoff that discards supervision.
-- Inspect the resolved `codex-luna-swarm` in each coordinator's execution context and confirm its Astra coordinator and Luna worker configuration matches this Skill. Lead awareness is not a dependency requirement: supply team scope and reporting through the Task packet. A named Skill or startup claim alone does not establish compatible contents. A missing or incompatible dependency blocks the team; do not silently substitute `orca-luna-swarm` or copy a competing worker workflow here.
+- Inspect the resolved `codex-luna-swarm` in each coordinator's execution context and confirm it preserves the host coordinator's model and reasoning settings and retains the native Luna worker configuration. Lead awareness is not a dependency requirement: supply team scope and reporting through the Task packet. A named Skill or startup claim alone does not establish compatible contents. A missing or incompatible dependency blocks the team; do not silently substitute `orca-luna-swarm` or copy a competing worker workflow here.
 - Verify each coordinator's effective model and effort from runtime session metadata or its effective launch receipt, including reused terminals. A requested configuration or agent self-description is not verification. A mismatch or unknown configuration blocks implementation; account for the attempted launch's resources before any documented corrective launch.
 - Coordinators are Orca-supervised Dispatches. Native Luna workers are not Orca Dispatches and must not be described as such. Native workers must not use their coordinator's Orca lifecycle authority or send `worker_done` on its behalf.
 
@@ -80,7 +82,7 @@ Bind one Run for the shared goal and create the currently independent Tasks befo
 
 ### 3. Launch And Establish Team Readiness
 
-Start each coordinator through Orca's documented supervised launch with the required coordinator model and effort. Start all independent teams before waiting on one. Do not launch the lead's coordinators through Codex's native Luna-worker tool.
+Start each coordinator through Orca's documented supervised launch with the coordinator model and effort from the Responsibility Boundary table as terminal launch parameters, not merely task-prompt text. Start all independent teams before waiting on one. Do not launch the lead's coordinators through Codex's native Luna-worker tool.
 
 Require a startup report before team implementation: the coordinator confirms its resolved Skill, allowed native collaboration surface, assignment boundaries, and any blocking prerequisite. The lead verifies effective launch evidence independently. Readiness means configuration and authority are established, not that the subgoal is complete.
 

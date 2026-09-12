@@ -20,16 +20,16 @@ Project-local Codex skills for durable goal execution and parallel coding with a
 
 ### Codex–Luna Swarm
 
-`$codex-luna-swarm` delegates independent investigation or implementation units to GPT-5.6 Luna workers at max reasoning effort. The Astra coordinator runs `gpt-6-astra` at `medium` reasoning effort, remains the sole coordinator, resolves conflicts, personally reviews integrated code, and owns final delivery.
+`$codex-luna-swarm` delegates independent investigation or implementation units to GPT-5.6 Luna workers at max reasoning effort. The invoking host remains the sole coordinator on its current model and reasoning settings, resolves conflicts, personally reviews integrated code, and owns final delivery.
 
 - [Skill instructions](.agents/skills/codex-luna-swarm/SKILL.md)
 - [Behavior cases](.agents/skills/codex-luna-swarm/tests/cases.md)
 
 ### Orca Swarm Lead
 
-`$orca-swarm-lead` keeps the invoking agent as lead on its current model and settings. The lead supervises multiple `gpt-6-astra` / `medium` coordinators in separate Orca terminals toward one shared goal. Each coordinator uses `codex-luna-swarm` for native `gpt-5.6-luna` / `max` workers, reviews its team's changes, and reports to the lead. The lead manages cross-team ownership and dependencies, personally reviews actual changes and the integrated result, and alone accepts the overall goal.
+`$orca-swarm-lead` keeps the invoking agent as lead on its current model and settings. The lead supervises multiple `gpt-5.6-sol` / `high` coordinators in separate Orca terminals toward one shared goal. Each coordinator uses `codex-luna-swarm` for native `gpt-5.6-luna` / `max` workers, reviews its team's changes, and reports to the lead. The lead manages cross-team ownership and dependencies, personally reviews actual changes and the integrated result, and alone accepts the overall goal.
 
-The lead supplies team scope, reporting requirements, and responsibility boundaries in each assignment. These orchestration rules belong to `orca-swarm-lead`, not to a lead-aware mode in `codex-luna-swarm`.
+The named model and effort are team-terminal launch settings, not a model requirement on the lead or on standalone `codex-luna-swarm`. The lead supplies team scope, reporting requirements, and responsibility boundaries in each assignment. These orchestration rules belong to `orca-swarm-lead`, not to a lead-aware mode in `codex-luna-swarm`.
 
 Use it in Orca with `orca-swarm-lead` available to the lead and `codex-luna-swarm` available to coordinator sessions:
 

@@ -11,8 +11,8 @@ Prompt:
 Expected invariants:
 
 - The invoking agent remains lead with its existing model and effort.
-- Independent team Tasks use separate supervised Orca coordinator terminals with verified `gpt-6-astra` / `medium` settings.
-- Each coordinator invokes `codex-luna-swarm`; its native workers use `gpt-5.6-luna` / `max` with no inherited conversation.
+- Independent team Tasks use separate supervised Orca coordinator terminals with verified `gpt-5.6-sol` / `high` settings.
+- Each coordinator invokes `codex-luna-swarm` without changing its launched model or effort; its native workers use `gpt-5.6-luna` / `max` with no inherited conversation.
 - Coordinators personally review their teams and all report to the lead.
 - The lead personally reads actual changes and the integrated diff, checks the shared outcome, and alone declares overall completion.
 
@@ -21,7 +21,7 @@ Expected invariants:
 Initial state:
 
 - The lead's model differs from the coordinator configuration.
-- The lead reads `codex-luna-swarm` as a dependency. That Skill defines an Astra coordinator and native Luna workflow, but no Lead reporting or Orca-specific behavior.
+- The lead reads `codex-luna-swarm` as a dependency. That Skill defines a model-independent coordinator and native Luna workflow, but no Lead reporting or Orca-specific behavior.
 
 Expected invariants:
 
@@ -61,7 +61,7 @@ Expected invariants:
 
 Initial state:
 
-- A new launch or a reused terminal has unknown settings or settings different from `gpt-6-astra` / `medium`.
+- A new launch or a reused terminal has unknown settings or settings different from `gpt-5.6-sol` / `high`.
 
 Expected invariants:
 
