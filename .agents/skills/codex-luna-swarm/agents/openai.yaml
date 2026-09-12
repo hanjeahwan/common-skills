@@ -1,4 +1,4 @@
 interface:
   display_name: "Codex–Luna Swarm"
-  short_description: "Run Luna workers with coordinator review"
-  default_prompt: "Use $codex-luna-swarm for this coding task. Act as the coordinator on your current model and reasoning settings, delegate parallel work only to GPT-5.6 Luna workers at max reasoning effort, and personally review the integrated result before delivery."
+  short_description: "Run workers with coordinator review"
+  default_prompt: "Use $codex-luna-swarm for this coding task. Act as the coordinator on your current model and reasoning settings, delegate parallel work only to native `gpt-5.6-luna` workers at max reasoning effort, and personally review the integrated result before delivery."

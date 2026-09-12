@@ -20,7 +20,7 @@ Project-local Codex skills for durable goal execution and parallel coding with a
 
 ### Codex–Luna Swarm
 
-`$codex-luna-swarm` delegates independent investigation or implementation units to GPT-5.6 Luna workers at max reasoning effort. The invoking host remains the sole coordinator on its current model and reasoning settings, resolves conflicts, personally reviews integrated code, and owns final delivery.
+`$codex-luna-swarm` delegates independent investigation or implementation units to native workers on `gpt-5.6-luna` at max reasoning effort. The invoking host remains the sole coordinator on its current model and reasoning settings, resolves conflicts, personally reviews integrated code, and owns final delivery.
 
 - [Skill instructions](.agents/skills/codex-luna-swarm/SKILL.md)
 - [Behavior cases](.agents/skills/codex-luna-swarm/tests/cases.md)
@@ -35,7 +35,7 @@ Use it in Orca with `orca-swarm-lead` available to the lead and `codex-luna-swar
 
 > Use $orca-swarm-lead to implement the API validation fix and its UI error handling as one goal. Coordinate the teams, review their actual changes, and verify the integrated behavior.
 
-This requires a live Orca orchestration guide, verified coordinator launch settings, and a dispatch policy that permits native Codex subagents. Unsupported combinations stop at preflight rather than bypassing runtime limits. Unlike `orca-luna-swarm`, Orca supervises the coordinators here, not each native Luna worker.
+This requires a live Orca orchestration guide, verified coordinator launch settings, and a dispatch policy that permits native Codex subagents. Unsupported combinations stop at preflight rather than bypassing runtime limits. Unlike `orca-luna-swarm`, Orca supervises the coordinators here, not each native worker.
 
 - [Skill instructions](.agents/skills/orca-swarm-lead/SKILL.md)
 - [Team contract](.agents/skills/orca-swarm-lead/references/team-contract.md)

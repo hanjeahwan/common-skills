@@ -21,7 +21,7 @@ Expected invariants:
 Initial state:
 
 - The lead's model differs from the coordinator configuration.
-- The lead reads `codex-luna-swarm` as a dependency. That Skill defines a model-independent coordinator and native Luna workflow, but no Lead reporting or Orca-specific behavior.
+- The lead reads `codex-luna-swarm` as a dependency. That Skill defines a model-independent coordinator and native worker workflow, but no Lead reporting or Orca-specific behavior.
 
 Expected invariants:
 
@@ -114,7 +114,7 @@ Expected invariants:
 
 Initial state:
 
-- A native Luna worker returns code and proposes sending Orca `worker_done` using copied coordinator IDs.
+- A native worker returns code and proposes sending Orca `worker_done` using copied coordinator IDs.
 
 Expected invariants:
 
@@ -169,7 +169,7 @@ Initial state:
 Expected invariants:
 
 - The lead follows the live guide's liveness and wait protocol, not a timer-based failure rule.
-- Silence alone does not trigger interruption, replacement, takeover, or pressure to interrupt the Luna workers.
+- Silence alone does not trigger interruption, replacement, takeover, or pressure to interrupt the workers.
 - It continues supervising without busy polling and does not deliver a required incomplete outcome.
 
 ## Repair after settlement or release
