@@ -1,11 +1,11 @@
 ---
 name: codex-luna-swarm
-description: Start or continue parallel coding work as the host coordinator that performs mandatory code review while `gpt-5.6-luna` workers run at max reasoning effort. Use when a coding task has multiple independent investigation or implementation units; when the user asks for a Luna swarm, Codex-Luna swarm, parallel workers, or coordinator-reviewed workers; or when related work continues, repairs, validates, or reviews an active Swarm. When invoked, require the coordinator to evaluate a useful Swarm split before proceeding without fan-out.
+description: Start or continue parallel coding work as the host coordinator that performs mandatory code review while `gpt-6-luna` workers run at max reasoning effort. Use when a coding task has multiple independent investigation or implementation units; when the user asks for a Luna swarm, Codex-Luna swarm, parallel workers, or coordinator-reviewed workers; or when related work continues, repairs, validates, or reviews an active Swarm. When invoked, require the coordinator to evaluate a useful Swarm split before proceeding without fan-out.
 ---
 
 # Codex–Luna Swarm
 
-Use one execution pattern: workers investigate or implement in parallel, then the coordinator personally reviews the combined code before delivery. Parallelism provides speed; the coordinator review gate provides safety. Do not split these into separate modes.
+Use one execution pattern: workers investigate or implement in parallel, then the coordinator personally reviews the combined code before delivery. Parallelism provides speed; delegated investigation protects the coordinator's context; the coordinator review gate provides safety. Do not split these into separate modes.
 
 ```mermaid
 flowchart TD
@@ -41,11 +41,12 @@ Use `coordinator` as the canonical name for the coordinating and reviewing actor
 - Host-role binding: The host agent executing this Skill is the coordinator for the entire Swarm, keeping its current model and reasoning settings unchanged.
 - Spawned-role restriction: Every subagent spawned while this Skill is active is a worker.
 - Review ownership: The host agent personally performs Step 5.
-- Every worker is spawned with `model: "gpt-5.6-luna"`, `reasoning_effort: "max"`, and `fork_turns: "none"`.
+- Every worker is spawned with `model: "gpt-6-luna"`, `reasoning_effort: "max"`, and `fork_turns: "none"`.
 - Workers must not spawn subagents.
 - Workers must not accept another worker's code as reviewed.
 - Every code change must pass the coordinator's direct review, including code the coordinator wrote or repaired itself. A worker's summary, test result, or self-assessment cannot replace this gate.
 - Every change in the integrated result must trace to the established goal, an acceptance condition, or a named uncertainty. A change that cannot be traced is rejected or reverted, not carried into delivery.
+- Review labor is never delegated. The coordinator reviews its own work under the same adversarial standard instead of routing it to another reviewer.
 - When this Skill is invoked, the coordinator must evaluate the task against the Swarm condition in Step 1 before proceeding alone.
 - Never invent work merely to increase the worker count.
 - The coordinator retains every approval decision.
@@ -63,6 +64,7 @@ Use `coordinator` as the canonical name for the coordinating and reviewing actor
 - Continue waiting while a worker remains running.
 - Workers run at max reasoning effort and therefore take longer than ordinary delegated work: slowness or silence is expected execution, not a fault signal.
 - Elapsed time alone must not justify prompting a running worker for progress, pausing it, interrupting it, replacing it, or taking over its assignment.
+- Accept or reject each worker's result against its acceptance conditions before deciding whether to reuse or replace it. Replacing a worker loses the context a repair would need.
 
 ## Workflow
 
@@ -77,6 +79,15 @@ Before assigning workers:
 - Direct-execution condition: No split satisfies the Swarm condition.
 - Direct-execution action: The coordinator proceeds alone and states the concrete constraint.
 
+Delegate noisy investigation so the coordinator's context stays clean:
+
+- Research-delegation condition: Producing the answer would generate far more noise than the answer itself, such as reading many files to find the few that matter, tracing a failure through long logs, surveying how a symbol is used repo-wide, or summarizing a large diff.
+- Research-delegation action: Assign it as a read-only worker whose `write_owner` is empty.
+- Direct-reading condition: The coordinator already knows the two or three files it needs, one search answers the question, or it is about to edit the same material itself.
+- Direct-reading action: The coordinator reads directly. Delegating material it will immediately edit forces a second read and saves nothing.
+- Research-splitting condition: A question decomposes into sub-parts that need no shared intermediate findings.
+- Research-splitting action: Assign one worker per sub-part. Never fragment a single coherent question to raise the worker count.
+
 ### 2. Assign Independent Ownership
 
 Give each worker a bounded task packet:
@@ -88,9 +99,10 @@ scope: allowed files, components, or questions
 write_owner: files this worker alone may modify; empty means read-only
 acceptance: observable conditions for success
 exclusions: actions and areas outside authority
-return: findings, sources when research was performed, changed files, validation, and unresolved risks
+return: what changed or the direct answer; evidence coordinates as file paths and symbols; sources when research was performed; validation run; unresolved risks and surprises
 ```
 
+- Return contract: Require a distilled result with its supporting evidence, not a transcript. Evidence coordinates must be precise enough to open directly, such as `src/session.rs:142` and `fn reconnect`.
 - Start with two to four workers.
 - Increase the worker count only when more proven independent units remain unassigned.
 
@@ -108,7 +120,7 @@ Use the collaboration subagent tool directly with:
 
 ```json
 {
-  "model": "gpt-5.6-luna",
+  "model": "gpt-6-luna",
   "reasoning_effort": "max",
   "fork_turns": "none"
 }
@@ -119,6 +131,9 @@ Use the collaboration subagent tool directly with:
 - Wait action: Wait for worker results without busy polling.
 - No-update action: Inspect the live agent state.
 - Running-state action: Continue waiting. Max-effort execution is expected to take longer, so do not prompt a running worker for a progress report or pause its assignment to check on it.
+- Acceptance action: Before deciding whether to reuse or replace that worker, run a targeted acceptance on that worker alone. Read the real diff of the files it owned, or the evidence coordinates of a read-only result, and judge that one assignment against its acceptance conditions. This is per-worker acceptance, not the Step 5 review of the integrated result.
+- Rejected-acceptance action: Send the repair to that worker instead of replacing it, so the worker keeps its context.
+- Accepted-acceptance action: Reuse that worker for an immediate follow-up when one exists.
 - Interrupt condition: The user requests interruption, the assignment leaves task scope, or continued execution would cross an authorization or safety boundary.
 - Interrupt action: Interrupt the running worker.
 - Replacement condition: The prior worker is no longer running and its assignment remains incomplete because it failed, reported that it cannot continue, or returned a partial result.
@@ -138,6 +153,14 @@ Use the collaboration subagent tool directly with:
 - Evidence collection: The coordinator reads every worker result.
 - Workspace inspection: The coordinator inspects the actual workspace.
 - Evidence gate: Treat worker summaries as claims until files, diffs, logs, or test output support them.
+
+Verification depth separates context hygiene from the evidence gate:
+
+- Code-change action: Read the complete real diff of every changed file. Delegated implementation is never accepted from its report alone.
+- Research-finding action: Open the evidence coordinates that carry a decision. Do not re-read the investigation the worker already absorbed.
+- Escalation condition: A research finding contradicts another worker, contradicts the workspace, or would change an irreversible decision.
+- Escalation action: Verify it directly at the authoritative source, or send the question back to the same worker that produced it.
+- Bloated-report action: Ask the same worker to tighten its answer instead of reading its transcript.
 
 - Reconcile contradictory worker results.
 - Reject out-of-scope edits and unexplained files.
@@ -164,6 +187,7 @@ The coordinator personally reviews the combined result before declaring success:
 - Worker repair action: Send the focused repair to that worker.
 - Coordinator repair condition: The repair does not need worker context and remains within the coordinator's existing authority.
 - Coordinator repair action: The coordinator fixes the defect directly.
+- Review-only completion: A read-only worker's report authorizes no file edits. Route fixes to a write owner or to the coordinator.
 - Stop condition: Further progress requires guessing or new authorization.
 - Stop action: Stop and report the required evidence or authorization.
 - Re-entry gate: Every repair returns to Step 4 and passes the complete coordinator review and validation gate before delivery.
@@ -195,4 +219,5 @@ A successful run meets all of these conditions:
 
 - Independent worker assignments provide real parallel execution.
 - No concurrent write ownership conflict remains.
+- Noisy investigation stayed inside the workers, and the coordinator worked from distilled results with usable evidence coordinates.
 - The coordinator independently inspects the integrated code and verification evidence before delivery.

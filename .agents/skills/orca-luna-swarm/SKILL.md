@@ -60,6 +60,7 @@ Use `coordinator` as the canonical name for the coordinating and reviewing actor
 - Luna workers must not dispatch sub-workers. Orca's nested worker depth is normally one generation; a worker that hits that limit completes its own task instead of routing around it.
 - Luna workers must not accept another Luna worker's code as reviewed.
 - Every code change must pass the coordinator's direct review, including code the coordinator wrote or repaired itself. A Luna worker's report, test result, or self-assessment cannot replace this gate.
+- Every change in the integrated result must trace to the established goal, an acceptance condition, or a named uncertainty. A change that cannot be traced is rejected or reverted, not carried into delivery.
 - Review labor is never delegated. The coordinator reviews its own work under the same adversarial standard instead of routing it to another reviewer.
 - When this Skill is invoked, the coordinator must evaluate the task against the Swarm condition in Step 1 before proceeding alone.
 - Never invent work merely to increase the Luna worker count.
@@ -75,7 +76,8 @@ Use `coordinator` as the canonical name for the coordinating and reviewing actor
 - Never infer a missing Luna worker identity. Claim continuity only when live Orca state establishes the Dispatch.
 - A wait that returns no message is a checkpoint, not a Luna worker failure.
 - Continue rolling waits while a Luna worker remains alive. Heartbeats and terminal activity prove liveness, not completion.
-- Elapsed time alone must not justify stopping, releasing, replacing, or taking over a Luna worker.
+- Luna workers run at max reasoning effort and therefore take longer than ordinary delegated work: slowness or silence is expected execution, not a fault signal.
+- Elapsed time alone must not justify prompting a running Luna worker for progress, pausing it, stopping it, releasing it, replacing it, or taking over its assignment.
 - Accept or reject each Luna worker's own result before deciding whether to release it. Releasing a settled Luna worker closes its terminal and discards the context a repair would need.
 - Account for every settled Luna worker before waiting again or ending the turn.
 
@@ -135,7 +137,7 @@ return: the direct answer or what changed; evidence coordinates as file paths an
 
 - Setup action: Create or bind the Run, then create every independent Task before starting any Luna worker.
 - Launch action: Start all independent Luna workers before waiting on any of them.
-- Model action: Request the `gpt-5.6-luna` model with max reasoning effort when starting a fresh Luna worker terminal. The model id is an opaque provider id and passes through unchanged.
+- Model action: Request the `gpt-6-luna` model with max reasoning effort when starting a fresh Luna worker terminal. The model id is an opaque provider id and passes through unchanged.
 - Launch-verification action: Read the start receipt and compare the effective launch against the request.
 - Launch-mismatch condition: The receipt shows a different effective model or effort, or the runtime does not support launch preferences.
 - Launch-mismatch action: Fall back to the custom-argv launch below, then confirm the effective argv. If neither path yields a verified Luna worker at max effort, stop and report it instead of delivering work from an unverified model.
@@ -144,7 +146,7 @@ The fallback composes two guide recipes that the guide documents separately: a t
 
 ```text
 # 1. Create the terminal with Codex's own model and reasoning-effort arguments.
---command 'codex --model gpt-5.6-luna -c model_reasoning_effort="max"'
+--command 'codex --model gpt-6-luna -c model_reasoning_effort="max"'
 # 2. Attach that exact terminal to the Task as a supervised Luna worker.
 orchestration worker-start --task <task_id> --terminal <handle>
 ```
@@ -155,7 +157,7 @@ orchestration worker-start --task <task_id> --terminal <handle>
 
 - Wait action: Use rolling waits for completion, escalation, and question messages with an explicit timeout. Never sleep or poll terminals.
 - Question action: Answer a Luna worker's blocking question by replying to that message, then keep waiting.
-- No-message action: Treat the empty window as a checkpoint. Inspect live worker state, then keep waiting while the Luna worker is alive.
+- No-message action: Treat the empty window as a checkpoint. Inspect live worker state, then keep waiting while the Luna worker is alive. Max-effort execution is expected to take longer, so never prompt a running Luna worker for a progress report or pause its assignment to check on it.
 - Settlement action: Process every message in a delivery and decide each settled worker's next owner before acknowledging it.
 - Acceptance action: Before deciding that owner, run a targeted acceptance on that worker alone. Read the real diff of the files it owned, or the evidence coordinates of a read-only result, and judge that one assignment against its acceptance conditions. This is per-worker acceptance, not the Step 5 review of the integrated result.
 - Rejected-acceptance action: Start the repair as a new Task on that exact terminal so the worker keeps its context, and keep that Luna worker as the owner.
@@ -219,6 +221,7 @@ The coordinator personally reviews the combined result before declaring success:
 - Self-authored condition: The coordinator implemented or repaired part of the change itself.
 - Self-authored action: Put that code through this same gate. Knowing the intent behind a change is not evidence that it is correct, so read it as adversarially as delegated code and state that it was self-reviewed.
 - Review-failure action: The coordinator identifies a concrete defect and acceptance condition.
+- Untraceable-change action: The coordinator rejects or reverts the change instead of carrying it into delivery.
 - Luna worker repair condition: The prior Luna worker's context is needed for the repair.
 - Luna worker repair action: Start the repair as a new Task on that Luna worker's retained terminal. If it was already released, apply the released-worker action from Step 4.
 - Coordinator repair condition: The repair does not need Luna worker context and remains within the coordinator's existing authority.

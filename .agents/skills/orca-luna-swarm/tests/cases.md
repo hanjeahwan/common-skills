@@ -125,6 +125,24 @@ Expected invariants:
 - The coordinator opens only the decision-bearing evidence coordinates for research findings instead of re-reading the whole investigation.
 - The coordinator runs proportionate validation and reports what was actually verified.
 
+## Change that does not trace to the goal
+
+Initial state:
+
+- A Luna worker completed its assigned acceptance condition.
+- Its diff also renames an unrelated module and reformats untouched files.
+
+Prompt:
+
+> The Luna worker is done. Deliver the result.
+
+Expected invariants:
+
+- The coordinator maps each change in the diff to the established goal, an acceptance condition, or a named uncertainty.
+- The coordinator does not accept the unrelated rename or reformatting as a harmless side effect.
+- The coordinator rejects or reverts the untraceable changes instead of delivering them.
+- The coordinator keeps the traced change, which still returns through integration and the full review gate.
+
 ## Contradictory research finding
 
 Initial state:
@@ -155,15 +173,18 @@ Initial state:
 
 - A Luna worker at max reasoning effort is still alive.
 - A wait window returns no completion, escalation, or question.
+- The elapsed time is normal for max-effort reasoning, but the user is impatient.
 
 Prompt:
 
-> Finish the Swarm task.
+> This is taking too long. Check on the Luna worker and finish the Swarm task.
 
 Expected invariants:
 
 - The coordinator treats the empty window as a checkpoint rather than a failure.
+- The coordinator treats the elapsed time as expected max-effort execution rather than a fault signal.
 - The coordinator inspects live worker state and keeps using rolling waits.
+- The coordinator does not prompt the running Luna worker for a progress report or pause its assignment because it is slow.
 - The coordinator does not stop, release, replace, or take over the Luna worker solely because of elapsed time.
 - The coordinator does not begin final review until the required outcome is complete or explicitly superseded for a valid reason.
 

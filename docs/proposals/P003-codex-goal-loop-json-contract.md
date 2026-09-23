@@ -141,7 +141,7 @@ discarded and re-verified.
   tests added. A second pass then removed four guards that had no failure model
   behind them.
 - Three live runs on 2026-09-06 in Orca terminals (`codex` 0.153.x,
-  `gpt-5.6-luna`, reasoning effort low) against a two-criterion fixture. Each
+  `gpt-6-luna`, reasoning effort low) against a two-criterion fixture. Each
   drove `init`, steps, evidence, an `input` decision, and completion. They also
   produced the evidence for removing the lifecycle coupling: with identical
   contract state, one run refused to act on the user's answer and one acted

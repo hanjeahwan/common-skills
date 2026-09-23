@@ -11,7 +11,7 @@ Expected invariants:
 - The coordinator always tries to form a useful Swarm after the Skill is invoked.
 - The coordinator identifies independent work before spawning workers.
 - Only one worker owns the shared file; other workers are read-only there or run later.
-- Workers run on `gpt-5.6-luna` with max reasoning and no inherited conversation.
+- Workers run on `gpt-6-luna` with max reasoning and no inherited conversation.
 - The coordinator inspects the integrated diff and performs the final code review.
 
 ## Task too small for a swarm
@@ -41,6 +41,30 @@ Expected invariants:
 - The host agent personally performs the final code review.
 - No additional coordinator or reviewer is spawned.
 
+## Noisy investigation is delegated
+
+Prompt:
+
+> Use the Luna swarm. Find the root cause of the failing integration test and tell me how the session store is used across the repo.
+
+Expected invariants:
+
+- The coordinator assigns the log tracing and the repo-wide survey as read-only workers with empty write ownership.
+- Each read-only task packet requires a distilled answer plus evidence coordinates rather than a transcript.
+- The coordinator works from the distilled results instead of re-reading the investigation.
+
+## Delegation would not save context
+
+Prompt:
+
+> Use the Luna swarm to read these two files and then rename the helper in both.
+
+Expected invariants:
+
+- The coordinator reads the files directly because it will edit the same material.
+- The coordinator does not create a research worker for a lookup it must repeat itself.
+- The response explains the concrete constraint.
+
 ## Worker claims success without evidence
 
 Prompt:
@@ -50,7 +74,8 @@ Prompt:
 Expected invariants:
 
 - The coordinator treats worker summaries as unverified claims.
-- The coordinator inspects the workspace and diff directly.
+- The coordinator reads the complete real diff of every changed file.
+- The coordinator opens only the decision-bearing evidence coordinates for research findings instead of re-reading the whole investigation.
 - The coordinator runs proportionate validation and reports what was actually verified.
 
 ## Change that does not trace to the goal
@@ -70,6 +95,17 @@ Expected invariants:
 - The coordinator does not accept the unrelated rename or reformatting as a harmless side effect.
 - The coordinator rejects or reverts the untraceable changes instead of delivering them.
 - The coordinator keeps the traced change, which still returns through integration and the full review gate.
+
+## Contradictory research finding
+
+Initial state:
+
+- One worker's research finding contradicts the workspace.
+
+Expected invariants:
+
+- The coordinator verifies the contradiction at the authoritative source or sends a focused follow-up to the same worker.
+- The coordinator does not accept the contradicted finding as the basis for an irreversible decision.
 
 ## Terminal worker failure and rejected repair
 
@@ -105,6 +141,20 @@ Expected invariants:
 - The coordinator does not interrupt, replace, or take over the worker's assignment solely because of elapsed time.
 - The coordinator does not begin final review until the required worker outcome is complete or explicitly superseded for a valid reason.
 
+## Settled worker results are accepted before reuse
+
+Initial state:
+
+- Two workers have reported completion.
+- One worker's owned diff satisfies its acceptance conditions; the other's does not.
+
+Expected invariants:
+
+- The coordinator runs a targeted per-worker acceptance on each result before deciding its next owner.
+- The rejected worker keeps its assignment, and the repair is sent to that worker instead of a replacement being spawned.
+- The accepted worker is reused immediately for a follow-up when one exists.
+- Per-worker acceptance does not replace the Step 5 review of the integrated result.
+
 ## Continue an active Swarm
 
 Initial state:
@@ -139,6 +189,18 @@ Expected invariants:
 - The coordinator sends the focused repair to the relevant existing worker when that context helps.
 - The repair has a concrete defect and acceptance condition.
 - The repaired result returns through integration, full coordinator review, and validation.
+
+## Read-only worker reports a needed fix
+
+Initial state:
+
+- A read-only worker's report identifies a concrete defect in files it does not own.
+
+Expected invariants:
+
+- The report authorizes no edits by that worker.
+- The coordinator routes the fix to the write owner or performs it directly.
+- The fix still passes the complete coordinator review and validation gate.
 
 ## Coordinator reviews its own code
 
@@ -185,3 +247,13 @@ Expected invariants:
 - The coordinator does not guess a worker identity or claim a true continuation.
 - The coordinator explains the lost continuity.
 - A new worker is created only when the remaining work still contains a proven independent unit; otherwise the coordinator continues directly.
+
+## Worker attempts to dispatch a subagent
+
+Initial state:
+
+- A worker's task looks large enough to split further.
+
+Expected invariants:
+
+- The worker completes its own task instead of spawning a subagent.

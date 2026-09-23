@@ -1,6 +1,6 @@
 ---
 name: orca-swarm-lead
-description: Lead multiple coding teams toward one shared goal in Orca. The invoking agent remains lead on its current model and settings, supervises coordinators in separate Orca terminals, and personally reviews their changes and the integrated result. Each coordinator uses codex-luna-swarm for native workers on gpt-5.6-luna at max effort and reports to the lead. Use when the user asks for a lead coordinating multiple swarms, multiple coordinator-and-worker teams in Orca, or continued management, repair, review, and delivery of that shared goal.
+description: Lead multiple coding teams toward one shared goal in Orca. The invoking agent remains lead on its current model and settings, supervises coordinators in separate Orca terminals, and personally reviews their changes and the integrated result. Each coordinator uses codex-luna-swarm for native workers on gpt-6-luna at max effort and reports to the lead. Use when the user asks for a lead coordinating multiple swarms, multiple coordinator-and-worker teams in Orca, or continued management, repair, review, and delivery of that shared goal.
 ---
 
 # Orca Swarm Lead
@@ -35,8 +35,8 @@ flowchart TD
 | Actor | Configuration | Responsibility |
 |---|---|---|
 | Lead | Invoking agent's current model and reasoning settings, unchanged | Understand the shared goal; allocate ownership; supervise teams; settle cross-team decisions; personally review changes; accept the overall result |
-| Coordinator | `gpt-5.6-sol`, `high` reasoning effort | One supervised Orca terminal per team; run `codex-luna-swarm`; personally review team changes; report to the lead |
-| Worker | Native subagent configuration owned by `codex-luna-swarm`: `gpt-5.6-luna`, `max` effort | Perform one bounded assignment and report to its coordinator |
+| Coordinator | `gpt-6-sol`, `high` reasoning effort | One supervised Orca terminal per team; run `codex-luna-swarm`; personally review team changes; report to the lead |
+| Worker | Native subagent configuration owned by `codex-luna-swarm`: `gpt-6-luna`, `max` effort | Perform one bounded assignment and report to its coordinator |
 
 Coordinator is a role, not a model name. The configuration above applies only when the lead launches team terminals; `codex-luna-swarm` keeps whichever model and reasoning settings its host session already uses.
 
