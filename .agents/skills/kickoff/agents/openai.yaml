@@ -1,0 +1,6 @@
+interface:
+  display_name: "Kickoff"
+  short_description: "开工前对齐目标、验收和路径，确认后再实现"
+  default_prompt: "使用 $kickoff：先调查这个任务，按格式给我对齐结果，等我确认“开始”后再修改。"
+policy:
+  allow_implicit_invocation: false

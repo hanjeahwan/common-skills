@@ -18,6 +18,13 @@ Project-local Codex skills for durable goal execution and parallel coding with a
 - [Skill instructions](.agents/skills/define-goal/SKILL.md)
 - [Behavior cases](.agents/skills/define-goal/tests/cases.md)
 
+### Kickoff
+
+`$kickoff` 在实质性实现、修改、重构、迁移或批量操作之前，先调查并输出对齐结果：目标、验收标准、边界、当前系统、事实与未知项、根因和建议路径，然后停止，等待用户确认“开始”。每个任务在 `.agent/tasks/<task-name>.md` 维护一份 Working Record，作为任务状态的单一真源，供会话恢复时读取，完成后默认删除。只在有新证据时调整路径，最后逐条按验收标准闭环验证。
+
+- [Skill instructions](.agents/skills/kickoff/SKILL.md)
+- [Behavior cases](.agents/skills/kickoff/tests/cases.md)
+
 ### Codex–Luna Swarm
 
 `$codex-luna-swarm` delegates independent investigation or implementation units to native workers on `gpt-6-luna` at max reasoning effort. The invoking host remains the sole coordinator on its current model and reasoning settings, resolves conflicts, personally reviews integrated code, and owns final delivery.
