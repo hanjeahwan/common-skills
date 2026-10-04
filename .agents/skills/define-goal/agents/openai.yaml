@@ -1,6 +1,6 @@
 interface:
   display_name: "Define Goal"
-  short_description: "Define and advance one standalone Goal document by evidence"
-  default_prompt: "Use $define-goal to turn my objective into a standalone Goal document and advance it with evidence until the goal result holds."
+  short_description: "Advance one Goal through execution, review, and acceptance"
+  default_prompt: "Use $define-goal to define my objective in one Goal record, set and verify its Codex runtime goal, and advance authorized work through review and final acceptance. Keep unavailable or unverified runtime setup explicitly unmet."
 policy:
   allow_implicit_invocation: false

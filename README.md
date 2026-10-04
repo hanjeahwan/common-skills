@@ -13,7 +13,7 @@ Project-local Codex skills for durable goal execution and parallel coding with a
 
 ### Define Goal
 
-`$define-goal` turns a stated objective into one standalone Goal document at `docs/goals/YYYYMMDD-<title>.md`, then advances that single document by evidence until the goal result holds.
+`$define-goal` turns a stated objective into one authoritative Goal at `docs/goals/YYYYMMDD-<title>.md`, then advances authorized work through dependency-aware phases, review, repair, and evidence-based final acceptance. When the user requests a native Codex goal, it uses and verifies the available runtime mechanism with an objective pointing to that same record; unavailable setup is reported explicitly. Document-only requests stop at the document.
 
 - [Skill instructions](.agents/skills/define-goal/SKILL.md)
 - [Behavior cases](.agents/skills/define-goal/tests/cases.md)
