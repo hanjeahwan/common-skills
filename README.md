@@ -13,7 +13,7 @@ Project-local Codex skills for durable goal execution and parallel coding with a
 
 ### Define Goal
 
-`$define-goal` turns a stated objective into one standalone Goal document at `docs/goals/YYYYMMDD-<title>.md`, then advances that single document by evidence until the goal result holds.
+`$define-goal` defines or updates one persistent Goal document at `docs/goals/YYYYMMDD-<title>.md` and restates the user's goals and problem in the conversation. When advancement is authorized, it tracks dependency-aware phases through verification, review, repair, and evidence-backed final acceptance. Defining the document alone does not authorize the underlying work.
 
 - [Skill instructions](.agents/skills/define-goal/SKILL.md)
 - [Behavior cases](.agents/skills/define-goal/tests/cases.md)
