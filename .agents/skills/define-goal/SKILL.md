@@ -20,8 +20,9 @@ competing Goal. Do not introduce persistent files for a request to plan only in 
 
 ## Boundaries and Invariants
 
-- A plan may change with evidence; the goal, scope, and acceptance criteria may not change without
-  authorization. Do not expand scope, weaken a criterion, or cancel required work to manufacture success.
+- Plans and verification coverage may change with evidence; the goal, scope, required outcomes, and
+  thresholds may not change without authorization. Do not expand scope, weaken a criterion, or cancel
+  required work to manufacture success.
 - Keep one Goal record, including prerequisites and parallel work. Do not create child goals,
   duplicate records, or a second task-state system. Actual code, artifacts, and observations determine
   real state; reconcile stale records with them rather than treating recorded claims as proof.
@@ -40,7 +41,8 @@ competing Goal. Do not introduce persistent files for a request to plan only in 
    uncertainties that can change the next action, risk, or acceptance judgment.
 2. Reuse the same Goal. If none exists, read [`references/goal-template.md`](references/goal-template.md)
    and create it using the Goal Record Contract before substantive execution. When adapting an existing
-   record, preserve its content and add missing applicable information in place, not in a replacement file.
+   record, preserve valid content and concurrent edits, not superseded claims about current state.
+   Reconcile it in place under the Goal Record Contract; do not replace the file or only append updates.
 3. On resume and before entering a new phase, read the Goal and reconcile relevant real state,
    dependencies, and evidence. Check whether an intended side effect already ran before repeating it.
    If the Goal cannot be created or updated, report its actual state and the persistence blocker;
@@ -62,14 +64,24 @@ is needed; do not manufacture changes merely to pass through an execution phase.
 ### 1. Establish and Restate the Goal
 
 **Enter:** a new Goal or material uncertainty about the existing goal or its boundaries.
-Define the problem, desired outcome, scope, non-goals, constraints, and observable acceptance criteria
-from the request, conversation, project rules, and inspected reality. Investigate resolvable unknowns;
-a missing user decision blocks only work that depends on it. Record unresolved material questions
-and their effect instead of inventing an answer or investigating unrelated details.
+Define the problem, scope, non-goals, and constraints from the request, conversation, project rules,
+and inspected reality. State the successful end state in user terms: what observable result would
+solve the problem within this scope? Translate it into **success criteria**, with relevant scenarios,
+boundaries, and a verification method. Use measurable thresholds only when justified; record missing
+material targets or decisions, investigate what can be resolved, and block only dependent work.
+
+Keep outcome criteria and required delivery gates distinguishable within **one acceptance set**.
+Implementation steps, passing checks, and completed review do not substitute for the user result;
+explicitly required implementation constraints and quality gates still apply. Check coverage in both
+directions: each criterion supports the goal or a required gate, and every required outcome has evidence
+planned for it. Ask: **Could every listed item pass while the in-scope problem remains unsolved?**
+Investigate concrete counterexamples and correct coverage of the authorized goal. Do not invent targets,
+add obligations, or enlarge scope to answer this question; material requirement changes need authorization.
 
 **Record and communicate:** at the end of initial alignment and after material realignment, restate
 **to the user, in your own words, what you think their goals are and what problem they are trying to
-solve**. Include the important boundaries, acceptance criteria, and remaining material uncertainty.
+solve**, including **what observable outcome will count as success**. Include the important boundaries,
+acceptance criteria, and remaining material uncertainty.
 Synthesize the intent, not a copy of the request or just a task list. Do not ask the user to perform
 this restatement. Reflect the same understanding in the Goal; a file-only summary is insufficient.
 
@@ -85,8 +97,11 @@ In the same Goal, identify each phase's tasks, dependencies, execution order, ex
 completion conditions, and current status. Include necessary investigation, prerequisites, execution,
 verification, review/repair, and final acceptance. Scale detail to the task, not to a fixed task count.
 Map tasks and checks to acceptance criteria so no criterion disappears between planning and delivery.
+Attach prerequisites to the actions that need them. When tasks in one phase have different dependencies,
+record those differences rather than making one blocked task stop the entire phase.
 
 **Record:** mark work pending, in progress, completed, blocked, or cancelled with a reason as applicable.
+Task progress is not a verification result: a completed setup task can still leave its outcome untested.
 For a blocker, identify affected tasks, the cause, and the condition for resuming. Plans awaiting
 permission are proposed, not scheduled. For actual parallel work, record real owners, write scopes,
 outputs, and the coordinator of the shared record; do not invent workers or duplicate dispatch.
@@ -115,8 +130,12 @@ and re-invocation belong to the invoking runtime; do not promise autonomous resu
 
 **Enter:** an outcome or change is ready to assess; earlier targeted checks may already provide evidence.
 Run the smallest meaningful checks for the changed behavior plus all applicable project-required
-checks. Label each result **passed, failed, blocked, or not run**, with its actual baseline and coverage.
-Follow project policy on adding permanent tests; writing test cases is not running them.
+checks. Label each result **passed, failed, blocked, or not run**. Identify the executor, checked baseline
+(commit/working-tree state for code, relevant inputs/resource state otherwise), method/command, actual
+result, and coverage limits. Reuse attributable
+worker evidence when policy permits, stating what was inspected versus personally rerun; a worker's
+"tests passed" summary alone is insufficient. Follow project policy on permanent tests; writing cases
+is not running them. Keep setup progress in the plan, not in place of verification results.
 
 Review **all changes for this goal and their integrated result**, not only the last edit or a worker's
 summary. For code changes, perform Code Review against correctness, boundaries, compatibility,
@@ -139,7 +158,8 @@ what prevents further progress. Writing code alone does not complete the phase o
 ### 5. Final Acceptance
 
 **Enter:** the candidate result has current verification and review evidence.
-Compare every applicable acceptance criterion against that evidence and confirm required artifacts
+Repeat the success-coverage check against the currently authorized problem and outcomes, not just the plan.
+Compare every applicable acceptance criterion against current evidence and confirm required artifacts
 actually exist. Record an itemized verdict with evidence references and material limitations. An
 earlier failed attempt does not veto sufficient current evidence, and a negative finding may satisfy
 an assessment goal; neither permits an unmet required condition to be relabeled as satisfied.
@@ -149,23 +169,41 @@ the needed authorized work or record the exact gap, blocker or stop reason, and 
 
 ## Goal Record Contract
 
-The Goal owns task state; detailed reports and source artifacts may own supporting evidence. Keep:
+The Goal owns task state; detailed reports and source artifacts may own supporting evidence. Give
+each kind of information one current home; summaries and final verdicts refer to it, not independent
+copies of progress or criterion statuses. Keep:
 
 | Information | Required content |
 | --- | --- |
-| Problem, goal, and boundaries | Problem and intended outcome; scope, non-goals, constraints, authorization, material unknowns |
-| Acceptance criteria | Each observable condition, verification method, current result, and evidence reference |
-| Phase plan | Tasks, dependencies, order, artifacts, completion conditions, status; reasons for blocked/cancelled work |
-| Current state and next action | Established facts, current phase, next authorized action and expected feedback, blockers and resume conditions |
-| Review and evidence | Sources, relevant baselines, methods, results, coverage, limitations, actual artifacts, review mode and finding closure |
+| Problem, goal, and boundaries | Successful end state; scope, non-goals, constraints, effective authorization and its source, material unknowns; selected approach and necessary rationale, not progress history |
+| Success criteria and acceptance | Outcome criteria and required delivery gates; each observable condition, verification method, current result, and evidence reference |
+| Execution plan and current state | Phase/tasks, dependencies, order, artifacts, completion conditions, task status; verified current facts, next authorized action and expected feedback, blockers and resume conditions |
+| Review and evidence | Executor, sources, checked version/state, methods, results, coverage, limitations, actual artifacts, review mode and finding closure |
 
-Use the template when creating or repairing a record. Layout may be compacted, but applicable
-information may not be dropped. For document-only work, label unperformed verification/review and
-proposed or unplanned execution honestly. Reference evidence rather than maintain competing copies;
-summarize key findings so the Goal is understandable without chat or raw logs. Detailed reports may
-be opened to audit claims. Label project-root-relative paths and use document-relative Markdown links.
-Update after important actions, at phase end, and on material changes; reconcile before resuming or
-entering a new phase as specified above.
+Use the template when creating or repairing a record. Layout may be compacted without dropping
+applicable information. For document-only work, label verification/review not performed and execution
+proposed or unplanned. Summarize evidence so the Goal is understandable without chat; detailed reports
+may be opened to audit claims. Label project-root-relative paths and use document-relative Markdown links.
+
+**Reconcile, do not accumulate.** After important actions, at phase end, and on material changes:
+
+1. Verify changed facts and the latest applicable decisions or authorization before updating. Resolve
+   conflicting claims against real state or authoritative instructions, not paragraph order or repetition.
+   If unresolved, record the uncertainty and how to verify it; pause dependent actions, especially repeat
+   writes, while independent authorized work continues.
+2. Revise the owning fields and affected summaries, tasks, blockers, next actions, criterion/evidence
+   links, and verdict. A resource confirmed created must not remain a current "create it next" task;
+   a changed permission must not coexist with an obsolete current authorization statement.
+3. Keep the selected approach actionable. Remove redundant planning prose or label necessary superseded
+   decisions and observations as historical, with their baseline and replacement. Preserve valid user and
+   concurrent edits, failure evidence, unresolved gaps, rollback rationale, and required audit records;
+   history must not act as a current instruction. Do not create history files merely to relocate clutter
+   or impose an arbitrary length cap.
+
+On resume, phase handoff, and before delivery, read the current record as a whole: do authorization,
+selected approach, task state, evidence, next action, and verdict agree with verified reality? Correct
+contradictions or expose unresolved ones before dependent action. Routine updates inspect affected
+information only; do not rewrite the entire Goal or rerun unaffected checks after every tool call.
 
 Path: `<dir>/YYYYMMDD-<title>.md`. Prefer the user's directory, otherwise `docs/goals/` at the nearest
 project root identified by `.git` or the project's entry file. If no root is identifiable, use
