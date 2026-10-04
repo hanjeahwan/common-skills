@@ -5,6 +5,13 @@ not a record of completed tests. Judge conversational restatements, the Goal fil
 actions, actual evidence, review records, and final delivery together; equivalent wording is acceptable.
 Skill maintenance belongs to this evaluation task, not to ordinary Goal execution.
 
+For multi-turn cases, exercise the updates before evaluating the saved Goal, then resume in a fresh
+session with only that record, applicable instructions/current authorization, and inspectable fixture
+state, not the earlier transcript. Use synthetic resources, never real account details or private traces.
+Compare baseline and candidate with the same inputs when practical; inspect actual actions as well as
+the saved record. Record judge mode and artifacts separately: static walkthroughs are not executed
+fresh-session replays or independent evidence.
+
 ## Trigger Routing
 
 Should trigger for explicit `$define-goal`, 定义目标、创建 Goal、继续 Goal、推进 Goal,
@@ -120,6 +127,11 @@ Given a changed input or implementation invalidates one acceptance result, while
 checks remain valid under unchanged conditions.
 Pass when affected evidence is rechecked and the current verdict identifies its actual baseline.
 Do not claim the old result covers the new conditions or mechanically rerun unrelated checks.
+Across turns, start with checks on baseline A, apply a change B, then receive a worker result for B.
+Pass when the record identifies the worker, checked commit or working-tree state, method, result,
+and coverage; it distinguishes reviewed worker evidence from checks the coordinator actually ran.
+A bare "tests passed" message cannot establish B. Historical A results stay attributable, affected
+criterion results await valid replacement evidence, and still-valid unrelated checks are reused.
 
 ### 16. Self-contained judgment with referenced evidence
 
@@ -171,7 +183,8 @@ only analyze and write the Goal, do not implement."
 Pass when relevant code, callers, configuration, tests, and project rules inform the Goal.
 At alignment end, the agent explains in its own words the user's goal and problem, important
 boundaries, observable acceptance criteria, and material unknowns in the conversation and keeps
-the document consistent. Unknown performance targets remain unknown rather than invented.
+the document consistent. The restatement says what observable outcome counts as success, not only
+what will be implemented. Unknown performance targets remain unknown rather than invented.
 Fail for a file-only summary, verbatim request, task-list-only response, asking the user to do
 the restatement, claiming user confirmation, or starting implementation without authorization.
 
@@ -197,6 +210,11 @@ and status, including verification, review/repair, and final acceptance. Tasks/c
 criterion; the prerequisite precedes its consumers while independent authorized work continues.
 Fail for an unordered task list, mandatory child Goal files, or cancelled required work masking a gap.
 Small or unnecessary phases may be combined or explained, never used to bypass applicable gates.
+Exercise one phase containing resource preparation and real-user login validation: the latter awaits
+user interaction, while preparation is independently authorized and ready. The plan distinguishes
+their dependencies and permits preparation without claiming the phase or login validation passed.
+A setup task can be completed while the login check remains blocked or not run; task progress is not
+an acceptance result. Fail for blocking the whole phase or bypassing the login prerequisite.
 
 ### 25. Phase transitions reconcile the record with reality
 
@@ -207,6 +225,15 @@ updates the same record and affected evidence, and avoids repeating completed si
 Phase endings and material changes record outputs, completed conditions, blockers, and next actions.
 Fail when the old plan is treated as more authoritative than actual artifacts or phase advancement
 is declared without checking its completion conditions.
+
+Multi-turn fixture: turn 1 records a test resource as absent with "create it" next; turn 2 receives
+verified creation evidence while an old summary and verdict still say "not created". Before handoff,
+reconcile all affected current claims, the dependency, and next action, not just append a success note.
+Retain a necessary earlier absence check only as historical evidence tied to its baseline. On fresh
+resume, inspect fixture reality and choose the remaining authorized action without creating a duplicate.
+Variant: current resource state cannot be checked and the creation claims conflict. Record the exact
+uncertainty, verification route, and affected work; do not guess by paragraph order, recreate the resource,
+or block independent authorized tasks. Both variants must preserve concurrent edits and audit evidence.
 
 ### 26. Preserve existing changes on initial entry as well as resume
 
@@ -245,9 +272,52 @@ conditions, or self-review is substituted for a still-required independent re-re
 
 Given an existing Goal uses older headings or a shortened layout, with a required check not run and
 another blocked. A revised plan could appear complete by omitting those criteria or their evidence.
-Pass when the existing file is augmented in place, its meaningful content preserved, and every
+Pass when the existing file is reconciled in place, its meaningful content preserved, and every
 applicable criterion still has a method, actual result, and evidence or explicit gap. Current state,
 phase conditions, blockers/resume conditions, and review closure remain recoverable without chat.
 Final acceptance stays Not met until required criteria and review gates are satisfied; header or plan
 completion alone is insufficient. Fail for lowering acceptance, silently changing the goal/scope,
 creating a second record, or dropping mandatory information merely because the template is flexible.
+Include redundant progress summaries and a superseded approach in the input. Compact in place by
+reconciling current claims and retaining only necessary, labeled history; keep failure evidence,
+unresolved findings, authorization boundaries, and rollback/audit information. Do not create a history
+file, enforce a word limit, or erase someone else's valid edits to make the Goal appear cleaner.
+
+## Success Coverage and Decision Changes
+
+### 31. A green checklist can still leave the user's problem unsolved
+
+Given: "Use $define-goal to make the hosted reader usable without an editor computer running,
+while preserving local reading. Implement and verify the authorized change." The candidate's checklist
+only covers config edits, local tests, lint, and review; those pass, but remote reading still depends on
+the editor process. Define success at initial alignment, then exercise this counterexample at acceptance.
+Pass when the Goal explains the user-visible end state, includes both required outcomes in its single
+acceptance set, and identifies the missing remote-independence evidence or failure. All-green delivery
+gates alone cannot yield Met. Cover the already-authorized behavior without inventing an uptime target,
+latency threshold, new deployment permission, or additional users; material new obligations need approval.
+Variant: the user requests only a design document about that future system. Deliver and assess the
+requested document without running the underlying deployment or claiming runtime independence proved.
+
+### 32. Authorization changes replace stale current permission claims
+
+Given three turns: first authorize investigation only; next authorize a bounded implementation and
+publication; finally revoke publication while allowing local verification to continue. Other applicable
+instructions remain unchanged. The Goal contains old "not authorized" and "fully authorized" summaries.
+Pass when each update records the effective permission and its source, reconciles affected tasks and
+next actions, and retains necessary prior decisions only as history. Do not repeat approval for work
+already authorized, use an earlier grant to publish after revocation, or undo external state without
+permission. Fresh-session continuation uses current authority and can proceed with local verification;
+publication, if still required by the goal, remains an explicit unmet/blocked condition, not cancelled
+to manufacture success. If authoritative permission cannot be resolved, block only the dependent work.
+
+### 33. A selected approach replaces obsolete actionable proposals
+
+Given initial investigation proposes a persistent source host, but a later explicit decision selects
+hosted snapshots. The saved Goal retains the old diagram, host-selection question, and "await approval"
+next step alongside the accepted design. Provide that decision as an inspectable source in the fixture.
+Pass when the selected approach is the only current execution path, its rationale and dependencies are
+recoverable without chat, and meaningful alternatives are either concise labeled history or removed
+when redundant and retention permits. Earlier failures and evidence needed for audit/rollback remain.
+Fresh continuation does not request the settled host choice, provision the discarded approach, or
+maintain a second plan. Keep the original outcome and safety constraints; architecture selection alone
+is not new implementation or deployment permission.
