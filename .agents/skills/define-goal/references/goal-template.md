@@ -1,9 +1,9 @@
 # Goal Template
 
-Use this starting point for one persistent Goal document. Merge or omit sections as needed,
-but keep the result, boundaries, completion basis, current judgment, and next step understandable
-without the conversation. State unknowns honestly and delete unused prompts. The date-only
-filename supplies the creation date; do not add a creation-time field.
+Use this structure for one persistent Goal. `SKILL.md` owns the workflow and completion rules;
+this file supplies recording fields, not a second policy. Compact or combine sections without
+omitting applicable information. Preserve existing records when adding missing fields, state
+unknowns honestly, and remove unused prompts. The date-only filename supplies the creation date.
 
 ```markdown
 # <Goal title>
@@ -11,47 +11,58 @@ filename supplies the creation date; do not add a creation-time field.
 Status: In progress
 Completion: Not met
 
-## Objective and Boundaries
+## Problem, Goal, and Boundaries
 
-<The user result that should hold.>
-<Scope, non-goals, applicable constraints, and the work actually authorized.>
-<Relevant version, inputs, environment, or comparison baseline, only when needed for judgment.>
+<Problem/current gap and the desired user outcome, in your own words.>
+<Scope, non-goals, constraints, and work actually authorized.>
+<Material assumptions or unknowns, their effect, and how to resolve them.>
+<Relevant versions, inputs, environment, or comparison baseline when needed.>
 
-## Completion Basis
+## Acceptance Criteria
 
-<Observable results sufficient to establish the objective, and how to verify them.>
-<Required checks and constraints, including what their results must establish.>
+| Criterion | Observable required result | Verification method | Current result | Evidence |
+| --- | --- | --- | --- | --- |
+| <Criterion> | <What must hold> | <Check or observation> | <passed / failed / blocked / not run> | <Reference below> |
 
-## Current Judgment and Action
+## Phase Plan
 
-<Established facts, material unknowns, and missing conditions that affect the next decision.>
-<The next authorized action and expected feedback, or the blocker/stop reason and resume condition.>
+| Phase / tasks | Dependencies and order | Expected artifacts | Completion conditions | Status |
+| --- | --- | --- | --- | --- |
+| <Phase and tasks> | <Prerequisites and sequence> | <Outputs> | <Criteria/checks permitting exit> | <pending / in progress / completed / blocked / cancelled; reason> |
 
-## Results and Evidence
+<Include investigation, prerequisites, execution, verification, review/repair, and final acceptance
+at the detail needed for this task; explain combined or unnecessary phases. For document-only work,
+label any future plan as proposed, or state that execution has not been planned.>
+<For actual parallel work only: owners, write scopes, outputs, shared-record coordinator.>
 
-<Actual results, distinguishing observations from inferences; mark unverified claims explicitly.>
-<Key evidence: source, relevant baseline, method, result, and coverage.>
-<Actual artifact paths; failed, blocked, or unrun checks and their effect on acceptance.>
+## Current State and Next Action
+
+<Current phase and established facts, distinguishing observations from inferences.>
+<Next authorized action and expected feedback; work awaiting permission is only proposed.>
+<Blockers: cause, affected tasks, and resume condition; identify independent work that can continue.>
+<Material changes to the plan and why; references to affected criteria/evidence, not duplicate results.>
+
+## Review and Evidence
+
+### Verification evidence
+
+<For each result: source, relevant baseline, method, actual result, coverage, and limitations.>
+<Actual artifact paths and durable report references; summarize findings rather than paste raw logs.>
+<Historical evidence invalidated by later changes, with replacement evidence or an explicit gap.>
+
+### Review
+
+<Actual reviewer or method: self-review / independent review; scope and reviewed baseline.>
+<Required review not yet performed or blocked, and its effect on acceptance.>
+<For no-change work, what artifacts/findings were assessed and why there is no code diff to review.>
+
+| Finding | Evidence / affected path | Blocking? | Resolution and recheck evidence | State |
+| --- | --- | --- | --- | --- |
+| <Finding, or explicit none if reviewed> | <Trigger and baseline> | <Yes/no and reason> | <Fix, verification, renewed review> | <Open/closed> |
+
+### Final acceptance
+
+<Overall verdict supported by the criterion results above and the review gate; do not copy a second
+independent set of criterion statuses here. Include remaining gaps and material limitations.>
+<When completion is established under SKILL.md, update the header and add Completed on: YYYY-MM-DD.>
 ```
-
-## Use Only What the Task Needs
-
-A prerequisite stays in this document: identify the missing condition, the action it enables,
-and how readiness will be checked. For actual parallel work, add owners, write scopes, outputs,
-and the coordinator of the shared record. Do not create child Goal documents.
-
-Summarize the findings and limitations supporting the verdict. Link durable detailed reports
-and source artifacts where useful; they may be consulted to verify the evidence. A bare link
-is not a result, and copying the full report is unnecessary. Label project-root-relative paths;
-use document-relative paths for Markdown links and recheck them if a project convention moves the file.
-
-For a document-only request, record the scope of that request and stop after drafting or updating.
-Do not infer permission to execute the underlying work or mark it complete because the draft exists.
-When a next action is awaiting authorization, label it as proposed, not scheduled or performed.
-
-On completion, replace pending-action prompts with the actual result, set `Status: Closed` and
-`Completion: Met`, and add `Completed on: YYYY-MM-DD` using the project's timezone or UTC.
-Keep the file in place unless applicable project conventions require archiving or relocation.
-When the completion basis is unmet, retain `Status: In progress` and `Completion: Not met` and
-explain the remaining gap or stop reason. Session end, file location, and a negative experimental
-finding are not verdicts by themselves; judge them against the actual objective.

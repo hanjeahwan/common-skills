@@ -1,6 +1,6 @@
 interface:
   display_name: "Define Goal"
-  short_description: "Define and advance one standalone Goal document by evidence"
-  default_prompt: "Use $define-goal to turn my objective into a standalone Goal document and advance it with evidence until the goal result holds."
+  short_description: "Align one Goal and advance authorized work through acceptance"
+  default_prompt: "Use $define-goal to define or update one persistent Goal document. Restate in your own words what you understand my goals to be and what problem I am trying to solve. Advance only the work I have authorized, using the skill's verification, review, and acceptance gates."
 policy:
   allow_implicit_invocation: false

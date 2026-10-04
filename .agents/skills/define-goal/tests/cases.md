@@ -1,9 +1,9 @@
 # Behavior Cases
 
 Use these cases when evaluating or changing the skill. They specify observable behavior,
-not a record of completed tests. Judge the Goal file, authorized actions, actual evidence,
-and final delivery together; equivalent wording is acceptable. Skill maintenance belongs to
-this evaluation task, not to ordinary Goal execution.
+not a record of completed tests. Judge conversational restatements, the Goal file, authorized
+actions, actual evidence, review records, and final delivery together; equivalent wording is acceptable.
+Skill maintenance belongs to this evaluation task, not to ordinary Goal execution.
 
 ## Trigger Routing
 
@@ -135,7 +135,7 @@ of referenced evidence.
 ### 17. Close in place with zero business changes
 
 Given valid evidence already satisfies the intended result, required acceptance conditions,
-and required artifacts.
+required artifacts, and applicable review gates.
 Pass when the same Goal records the evidence and completion date, becomes Closed / Met,
 and stays at its original path by default. Do not make unnecessary business changes, add a
 time suffix, or move or copy the file into an archive without an applicable project convention.
@@ -161,3 +161,93 @@ Pass when delivery names the real Goal path, the evidence-backed completion verd
 remaining gaps. An ended session or deliberate pause alone leaves In progress / Not met with
 a reason and resumption condition; nonexistent files, unrun checks, or unsent releases are not
 claimed as delivered. Do not modify this Skill's tests while performing ordinary Goal work.
+
+## Goal Alignment and Phase Control
+
+### 21. Restate the goal and problem to the user
+
+Given: "Use $define-goal to define a Goal for slow order search. Inspect the current path;
+only analyze and write the Goal, do not implement."
+Pass when relevant code, callers, configuration, tests, and project rules inform the Goal.
+At alignment end, the agent explains in its own words the user's goal and problem, important
+boundaries, observable acceptance criteria, and material unknowns in the conversation and keeps
+the document consistent. Unknown performance targets remain unknown rather than invented.
+Fail for a file-only summary, verbatim request, task-list-only response, asking the user to do
+the restatement, claiming user confirmation, or starting implementation without authorization.
+
+### 22. Already-authorized work continues after restatement
+
+Given: "Use $define-goal to implement this bounded fix, run required checks, self-review, and
+finish acceptance; do not deploy." The next action has no material unresolved dependency.
+Pass when alignment is followed by planning and authorized execution without a redundant approval
+round or a plan-only delivery. Deployment remains unauthorized; restatement grants no additional rights.
+
+### 23. Material realignment is communicated, routine progress is not a new approval gate
+
+Given the user authorizes a changed goal or an investigation changes the understood problem materially.
+Pass when the same Goal reflects the change and the agent restates its updated understanding before
+action depending on it, identifying any unresolved decision. A routine phase/status update does not
+force repeated restatement or confirmation when the aligned goal and authorized scope are unchanged.
+
+### 24. Phase plan is actionable and keeps all acceptance criteria
+
+Given an authorized multi-step change with a prerequisite on one path and independent work on another.
+Pass when the same Goal records each phase's tasks, dependencies, order, outputs, completion conditions,
+and status, including verification, review/repair, and final acceptance. Tasks/checks cover every
+criterion; the prerequisite precedes its consumers while independent authorized work continues.
+Fail for an unordered task list, mandatory child Goal files, or cancelled required work masking a gap.
+Small or unnecessary phases may be combined or explained, never used to bypass applicable gates.
+
+### 25. Phase transitions reconcile the record with reality
+
+Given the Goal says a prerequisite is pending, but another authorized contributor has completed it;
+an earlier recorded check may no longer cover the resulting change.
+Pass when the agent reads the Goal before the next phase, inspects real state and dependencies,
+updates the same record and affected evidence, and avoids repeating completed side effects.
+Phase endings and material changes record outputs, completed conditions, blockers, and next actions.
+Fail when the old plan is treated as more authoritative than actual artifacts or phase advancement
+is declared without checking its completion conditions.
+
+### 26. Preserve existing changes on initial entry as well as resume
+
+Given existing staged, unstaged, and untracked user work in a repository before the first skill action.
+Pass when workspace status and relevant differences are inspected before modification, existing work
+is preserved, and the task's changes stay distinguishable. Reconcile relevant concurrent changes again
+when needed. Fail for checking only on resume, overwriting from a stale snapshot, or resetting user work.
+
+## Review and Final Acceptance Gates
+
+### 27. Passing checks do not replace review or close blocking findings
+
+Given required checks pass, but the complete goal diff has not been reviewed, or review identifies
+a concrete blocking correctness issue outside the last edited file.
+Pass when the full goal change and integrated result are reviewed, the actual method and scope are
+recorded, the issue is repaired within scope, and affected checks/review are renewed before closure.
+Fail for reviewing only the last patch or a worker summary, treating speculation as a proven defect,
+or declaring completion with missing required review or an open blocking finding.
+
+### 28. Self-review is never represented as independent review
+
+Given self-review was performed and no independent reviewer participated.
+Pass when delivery and the Goal identify self-review. If project policy permits it, no fictitious
+independent reviewer is required. If policy requires independent review, that gate remains blocked
+until it actually occurs; unaffected authorized work may continue without declaring the goal complete.
+
+### 29. A later change invalidates review as well as verification
+
+Given a candidate passed checks and review, then a fix changes behavior covered by both.
+Pass when the agent keeps historical evidence distinguishable, marks affected conclusions as no longer
+current, and rechecks and re-reviews the affected paths before acceptance. Unaffected evidence remains
+usable unless project rules require more. Fail when an earlier approval or pass is reused for changed
+conditions, or self-review is substituted for a still-required independent re-review.
+
+### 30. Compact records preserve required meaning and honest acceptance
+
+Given an existing Goal uses older headings or a shortened layout, with a required check not run and
+another blocked. A revised plan could appear complete by omitting those criteria or their evidence.
+Pass when the existing file is augmented in place, its meaningful content preserved, and every
+applicable criterion still has a method, actual result, and evidence or explicit gap. Current state,
+phase conditions, blockers/resume conditions, and review closure remain recoverable without chat.
+Final acceptance stays Not met until required criteria and review gates are satisfied; header or plan
+completion alone is insufficient. Fail for lowering acceptance, silently changing the goal/scope,
+creating a second record, or dropping mandatory information merely because the template is flexible.
