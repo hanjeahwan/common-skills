@@ -1,0 +1,6 @@
+interface:
+  display_name: "Autopilot"
+  short_description: "连接长期 Goal 的对齐、自治执行、决策记录和最终验收"
+  default_prompt: "使用 $autopilot，在 notes topic 中建立或复用唯一 Goal。跨 session 恢复时使用 pstack:recall，按 define-goal、pstack:poteto-mode 和 pstack:show-me-your-work 推进已授权工作，回写同一 topic，并完成最终验收。"
+policy:
+  allow_implicit_invocation: false

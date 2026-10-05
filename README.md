@@ -18,6 +18,13 @@ Project-local Codex skills for durable goal execution and parallel coding with a
 - [Skill instructions](.agents/skills/define-goal/SKILL.md)
 - [Behavior cases](.agents/skills/define-goal/tests/cases.md)
 
+### Autopilot
+
+`$autopilot` connects `define-goal`, `pstack:recall`, `pstack:poteto-mode`, and `pstack:show-me-your-work` to advance, record, and verify long-term goals across sessions in one notes topic.
+
+- [Skill instructions](.agents/skills/autopilot/SKILL.md)
+- [Behavior cases](.agents/skills/autopilot/tests/cases.md)
+
 ### Codex–Luna Swarm
 
 `$codex-luna-swarm` delegates independent investigation or implementation units to native workers on `gpt-6-luna` at max reasoning effort. The invoking host remains the sole coordinator on its current model and reasoning settings, resolves conflicts, personally reviews integrated code, and owns final delivery.
