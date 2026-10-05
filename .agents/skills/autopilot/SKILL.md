@@ -12,7 +12,7 @@ Advance a long-term goal from its definition in a notes topic to a verifiable fi
 ## Sequence
 
 1. Use `$define-goal` to establish or reuse the single Goal and advance it through its workflow. Use `$pstack:technical-writing` when writing or updating the Goal document. Follow the current notes rules for creation, search, editing, and validation. Keep the Goal body out of the topic README.
-2. Once the Goal is aligned, the next action is clear, and authorization is established, use the `$pstack:poteto-mode` Skill and follow its `Autonomous run` playbook (`playbooks/autonomous-run.md`).
+2. Once the Goal is aligned, the next action is clear, and execution is authorized, use the `$pstack:poteto-mode` Skill and follow its `Autonomous run` playbook (`playbooks/autonomous-run.md`) within the Goal's effective boundaries.
 3. Use `$pstack:show-me-your-work` to maintain the same TSV decision log. It owns the format, append rules, and location. After important actions, at phase completion, or when state materially changes, update the corresponding Goal fields in the same topic rather than only appending summaries.
 4. Before completion, return to `$define-goal` for verification, review, and final acceptance. Also complete the log audit and cross-model review required by `$pstack:show-me-your-work`. Record any unmet required gates honestly and do not declare the goal complete.
 
@@ -26,7 +26,8 @@ Long-term Goals live in a notes topic at /Users/codeartz/workspaces/notes/projec
 - Verify acceptance yourself before ending the task. A successful command does not establish goal completion.
 - Prioritize verification of the real workflow, actual consumers, actual state changes, and side effects.
 - Preserve the user-specified environment, data sources, consumer entry points, and acceptance path unless the user explicitly authorizes a replacement.
-- Proceed directly with solvable, reversible work within existing authorization. Obtain the necessary authorization for irreversible actions, production changes, deletion, force pushes, and external messages.
+- Once the user authorizes execution of the Goal, carry out the work needed to achieve it within its effective boundaries. Those boundaries include its scope, constraints, permission limits, and explicit user checkpoints. Do not seek separate approval for each step, phase, or session. Ask again only when a proposed action would cross those boundaries or reach a checkpoint requiring a user decision. Use the currently valid boundaries if the user changes or revokes authorization.
+- Before pausing to ask the user, investigate, verify, and gather evidence from relevant documentation, code, configuration, logs, resources, and prior decisions. Resolve observable facts and routine implementation choices yourself. Ask only for an unresolved material decision, missing authorization, or a blocker requiring user input. Explain what you checked, what remains unresolved, and the minimum input needed. Continue independent authorized work while waiting.
 - Record key decisions without creating bloated activity logs or duplicate state systems.
 - When resuming across sessions or after context compaction, use $pstack:recall with the current Goal and TSV decision log to restore context, verify state, and determine the next action. Before resuming an interrupted operation, check whether its side effects have already occurred.
 - Reuse existing decisions when you find them. Do not ask the user to reconfirm choices that are already clear.
